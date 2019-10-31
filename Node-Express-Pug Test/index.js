@@ -43,4 +43,11 @@ app.get('/demo', function(req, res) {
 	connection.end();
 })
 
+app.get('/recipeDisplay', function(req, res) {
+	res.render('recipeDisplay', { name: "Recipe Name", recipeID: "000000", cookTime: "X hours", prepTime: "XX minutes", 
+	ingredients: "Ingredient 1, Ingredient 2, Ingredient 3", rating: "3/5", course: "Dessert", 
+	instructions: "Prep, Stir, Cook, Bake"});
+	
+})
+
 app.listen(3000);
