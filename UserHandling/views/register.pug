@@ -1,0 +1,20 @@
+h1 Thank you for registering with Recipedia!
+
+h2 Please enter your information below:
+form(method = 'POST', action = '/register')
+	#form-body
+		label Email:
+		input.form-control(name='email', type='text')
+	#form-body
+		label Username:
+		input.form-control(name='username', type='text')
+	#form-body
+		label Password:
+		input.form-control(name='password', type='password')
+	#form-body
+		label Confirm password:
+		input.form-control(name='password_check', type='password')
+	input.btn.btn-primary(type='submit', value='submit')
+br
+h2 Or, return to the login page.
+a(href='/launchpad') Click me!

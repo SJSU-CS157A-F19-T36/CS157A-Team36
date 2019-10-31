@@ -1,0 +1,14 @@
+h1 Welcome to Recipedia!
+
+h2 Log in here:
+form(method = 'POST', action = '/launchpad')
+	#form-body
+		label Username:
+		input.form-control(name='username', type='text')
+	#form-body
+		label Password:
+		input.form-control(name='password', type='password')
+	input.btn.btn-primary(type='submit', value='submit')
+br
+h2 First time?
+a(href='/register') Click me!
