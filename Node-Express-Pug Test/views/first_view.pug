@@ -3,10 +3,10 @@ extends layout
 block content
 	header(class="top-header")
 		nav(class="top-nav")
-			a(href="#") Home
+			a(href="/home") Home
 			a(href="#") Profile
-		span(id="welcome-msg") Welcome, user
-		a(id="logout-link" href="logout") Logout
+		span(id="welcome-msg") Welcome, #{user}
+		a(id="logout-link" href="/logout") Logout
 		i(id="avatar" class="avatar fa fa-user fa-2x")
 
 	div(class="container")
@@ -23,33 +23,16 @@ block content
 					a(href="#" id="fav-btn" class="main-nav-btn active")
 						i(class="fa fa-heart")   My Favorites
 			url(id="item-list")
-				li(class="item")
-					img(alt="item image" src="https://images.media-allrecipes.com/userphotos/300x300/1244896.jpg")
-					div
-						a(class="item-name" href="#") Spicy Shrimp and Tomato Scampi
-						div(class="stars")
-							i(class="fa fa-star")
-							i(class="fa fa-star")
-							i(class="fa fa-star")
-					div(class="fav-link")
-						i(class="fa fa-heart")
-				li(class="item")
-					img(alt="item image" src="https://images.media-allrecipes.com/userphotos/300x300/1244896.jpg")
-					div
-						a(class="item-name" href="#") Spicy Shrimp and Tomato Scampi
-						div(class="stars")
-							i(class="fa fa-star")
-							i(class="fa fa-star")
-							i(class="fa fa-star")
-					div(class="fav-link")
-						i(class="fa fa-heart")
-				li(class="item")
-					img(alt="item image" src="https://images.media-allrecipes.com/userphotos/300x300/1244896.jpg")
-					div
-						a(class="item-name" href="#") Spicy Shrimp and Tomato Scampi
-						div(class="stars")
-							i(class="fa fa-star")
-							i(class="fa fa-star")
-							i(class="fa fa-star")
-					div(class="fav-link")
-						i(class="fa fa-heart")
+				for recipe in recipes
+					li(class="item")
+						img(alt="item image" src=recipe.image)
+						div
+							a(class="item-name" href='/detail?name=' + recipe.name) #{recipe.name}
+							div(class="stars")
+								i(class="fa fa-star")
+								i(class="fa fa-star")
+								i(class="fa fa-star")
+						div(class="fav-link")
+							i(class="fa fa-heart")
+
+
