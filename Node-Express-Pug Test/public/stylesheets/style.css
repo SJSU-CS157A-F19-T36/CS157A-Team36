@@ -208,6 +208,11 @@ ul {
     color: #990000;
     padding-top: 10px;
 }
+#register-form h1 {
+    text-align: center;
+    font-size: 24px;
+    padding: 20px 0 20px 0;
+}
 #register-form {
     color: #624630;
     margin: 0px auto;
@@ -230,13 +235,13 @@ ul {
 
 #register-form #login-form-btn {
     cursor: pointer;
-    float: left;
+    float: right;
     padding: 8px 10px;
     text-align: left;
 }
 #register-form #register-btn {
     cursor: pointer;
-    float: right;
+    float: left;
     padding: 8px 20px;
     text-align: right;
 }

@@ -11,8 +11,8 @@ block content
             label Email: *
             input(id="register-email" name="email" type="text")
             button(id="register-btn") Register
-            p(id="register-result") #{status}
         button(id="login-form-btn" onclick="move()") Back to Login
+        p(id="register-result") #{status}
     script.
         function move() {
             window.location.href = '/'
