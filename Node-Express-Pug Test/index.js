@@ -55,18 +55,19 @@ app.get('/home', function(req, res) {
 					};
 					recipe_list.push(recipe);
 				}
-				console.log(recipe_list[0].name);
-				console.log(recipe_list[0].image);
+
 				res.render('first_view', {"user" : username , "recipes" : recipe_list});
 
 			}
-		})
+		});
 		connection.end();
     } else {
 		res.redirect('/');
 	}
 
-})
+});
+
+
 app.post('/auth', function(req, res){
 	var username = req.body.username;
 	var password = req.body.password;
@@ -100,16 +101,15 @@ app.post('/register', function(req, res){
 	var username = req.body.username;
 	var password = req.body.password;
 	var email = req.body.email;
-	// console.log(email);
     var connection = getConnection();
     connection.connect();
-    if (username === "" || password == "") {
-    	res.send('Please fill in all fields');
-		res.end();
+    if (username === "" || password === "" || email === "") {
+    	res.render('register', {"status": "Please fill in all fields"});
+		return;
 	}
     if (username.match(/^[a-z0-9_]+$/) === null) {
-    	res.send('Invalid username');
-    	res.end();
+    	res.render('register', {"status":"Invalid username"});
+    	return;
 	}
     // password = md5(username + md5(password));
 	connection.query('INSERT INTO users VALUES (?,?,?,?)', [username, username, password, email], function(error, results, fields) {
@@ -128,44 +128,67 @@ app.post('/register', function(req, res){
 app.get('/logout', function(req, res) {
 	req.session.loggedin = false;
 	res.redirect('/');
-})
+});
 
 
-/* NEED DETAIL PAGE
+
 app.get('/detail', function(req, res) {
-	var name = req.query.name;
-	console.log(name);
-	var connection = getConnection();
-	connection.connect();
-	connection.query('SELECT * FROM recipes', function(err, rows, fields) {
+	if (req.session.loggedin) {
+		var username = req.session.loggedin;
+		var name = req.query.name;
+		var connection = getConnection();
+		connection.connect();
+		connection.query('SELECT * FROM recipes WHERE recipeID = ?', [name], function(err, rows, fields) {
 
-	});
-});
-
-**/
-
-app.get('/demo', function(req, res) {
-	var list = [];
-
-	var connection = getConnection();
-	connection.connect();
-
-	connection.query('SELECT * FROM recipes', function(err, rows, fields) {
-		if (err) { throw err; }
-		else {
-			for (var i = 0; i < rows.length; i++) {
-				var person = {
-					'id' : rows[i].recipeID,
-					'name' : rows[i].image_url
-					// 'pw' : rows[i].password
+			if (err) { throw err;}
+			else {
+				console.log(rows[0].recipeID);
+				var details = {
+					'name' : rows[0].recipeID,
+					'ingredient' : rows[0].ingredient,
+					'author' : rows[0].author,
+					'instruction' : rows[0].instruction,
+					'prepTime' : rows[0].prepTime,
+					'cookTime' : rows[0].cookTime,
+					'course' : rows[0].course,
+					'servingSize' : rows[0].servingSize,
+					'image' : rows[0].image_url
 				};
-				list.push(person);
+				res.render('detail', {"details" : details});
 			}
-			res.render('demo', {"list" : list});
-		}
-	});
-	connection.end();
+
+		});
+		connection.end();
+	} else {
+		res.redirect('/');
+	}
+
 });
+
+
+
+// app.get('/demo', function(req, res) {
+// 	var list = [];
+//
+// 	var connection = getConnection();
+// 	connection.connect();
+//
+// 	connection.query('SELECT * FROM recipes', function(err, rows, fields) {
+// 		if (err) { throw err; }
+// 		else {
+// 			for (var i = 0; i < rows.length; i++) {
+// 				var person = {
+// 					'id' : rows[i].recipeID,
+// 					'name' : rows[i].image_url
+// 					// 'pw' : rows[i].password
+// 				};
+// 				list.push(person);
+// 			}
+// 			res.render('demo', {"list" : list});
+// 		}
+// 	});
+// 	connection.end();
+// });
 
 app.listen(3000);
 module.exports = app;

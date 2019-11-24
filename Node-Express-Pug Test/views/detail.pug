@@ -1,0 +1,32 @@
+extends layout
+
+block content
+    header(class="top-header")
+        nav(class="top-nav")
+            a(href="/home") Home
+            a(href="#") Profile
+        span(id="welcome-msg") Welcome,
+        a(id="logout-link" href="/logout") Logout
+        i(id="avatar" class="avatar fa fa-user fa-2x")
+
+    div(class="container")
+        header
+            p
+                span Recipedia
+        section(class="main-section")
+            aside(id="item-nav")
+                nav(class="main-nav")
+                    a(href="/home" id="show-btn" class="main-nav-btn active")
+                        i(class="fa fa-search")   Show Recipe
+                    a(href="#" id="add-btn" class="main-nav-btn active")
+                        i(class="fa fa-map-marker")   Add Recipe
+                    a(href="#" id="fav-btn" class="main-nav-btn active")
+                        i(class="fa fa-heart")   My Favorites
+            section(class="details")
+                h1(id="recipe-name") #{details.name}
+                div(class="rating-star")
+                    i(class="fa fa-star")
+                    i(class="fa fa-star")
+                    i(class="fa fa-star")
+                p recipe by Recipedia
+
