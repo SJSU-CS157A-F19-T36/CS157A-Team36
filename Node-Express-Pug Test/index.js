@@ -10,7 +10,7 @@ function getConnection() {
 	return mysql.createConnection({
 		host	: 'localhost',
 		user	: 'root',
-		password: 'root',
+		password: 'Something0clever.',
 		database: 'cs157a'
 	});
 }
@@ -50,7 +50,7 @@ app.get('/home', function(req, res) {
 			else {
 				for (var i = 0; i < results.length; i++) {
 					var recipe = {
-						'name' : results[i].recipeID,
+						'name' : results[i].name,
 						'image' : results[i].image_url
 					};
 					recipe_list.push(recipe);
@@ -107,22 +107,30 @@ app.post('/register', function(req, res){
     	res.render('register', {"status": "Please fill in all fields"});
 		return;
 	}
-    if (username.match(/^[a-z0-9_]+$/) === null) {
+    if (username.match(/^\w+/) === null) {
     	res.render('register', {"status":"Invalid username"});
     	return;
 	}
     // password = md5(username + md5(password));
-	connection.query('INSERT INTO users VALUES (?,?,?,?)', [username, username, password, email], function(error, results, fields) {
-        var status;
-		if (error) {status = "user exists"}
-        else {
-        	status = "successfully register";
-		}
-		res.render('register', {"status" : status});
-        // res.end();
-	});
-    connection.end();
-
+    connection.query('SELECT * FROM users WHERE username = ?', username, function(error, results, fields) {
+    	var status;
+    	if (results.length > 0) {
+    		status = "User already exists.";
+    		res.render('register', {"status" : status});
+    	} 
+    	else {
+    		connection.query('INSERT INTO users (username, password, email) VALUES (?,?,?)', [username, password, email], function(error2, results2, fields2) {
+    			if (error2) {
+    				status = "User exists.";
+    				console.log(error2);
+    			}
+    			else {
+    				status = "Successfully registered!";
+    			}
+    			res.render('register', {"status" : status});
+    		});
+    	}
+    });
 });
 
 app.get('/logout', function(req, res) {
@@ -138,13 +146,13 @@ app.get('/detail', function(req, res) {
 		var name = req.query.name;
 		var connection = getConnection();
 		connection.connect();
-		connection.query('SELECT * FROM recipes WHERE recipeID = ?', [name], function(err, rows, fields) {
+		connection.query('SELECT * FROM recipes WHERE name = ?', [name], function(err, rows, fields) {
 
 			if (err) { throw err;}
 			else {
-				console.log(rows[0].recipeID);
+				console.log(rows[0].name);
 				var details = {
-					'name' : rows[0].recipeID,
+					'name' : rows[0].name,
 					'ingredient' : rows[0].ingredient,
 					'author' : rows[0].author,
 					'instruction' : rows[0].instruction,
