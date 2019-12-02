@@ -1,0 +1,22 @@
+extends layout
+
+block content
+    div(id="login-form")
+        form(action="/auth" method="POST")
+            h1 Login Form
+            label(for="username") Username:
+            input(id="username" name="username" type="text")
+            label(for="password") Password:
+            input(id="password" name="password" type="password")
+            button(id="login-btn") Login
+        button(id="register-form-btn" onclick="move()") New User? Register
+        p(id="login-error")
+    script.
+        function move() {
+            window.location.href = '/register'
+        }
+
+
+
+
+
