@@ -252,3 +252,45 @@ ul {
     color: #990000;
     padding-top: 10px;
 }
+.recp-img {
+
+    width:300px;
+    height: 250px;
+}
+.details {
+    display: flex;
+}
+.recipe-title {
+    display: block;
+}
+#add-recipe h2 {
+    text-align: center;
+    font-size: 20px;
+    padding: 10px 0 10px 0;
+}
+#add-recipe {
+    color: #000000;
+    margin: 0px auto;
+    overflow: auto;
+    padding: 40px;
+    width: 350px;
+}
+
+#add-recipe label {
+    display: block;
+}
+
+#add-recipe input {
+    border: none;
+    display: block;
+    margin-bottom: 10px;
+    padding: 8px;
+    width: 100%;
+}
+
+#add-recipe #add-recipe-btn {
+    cursor: pointer;
+    float: right;
+    padding: 8px 10px;
+    text-align: left;
+}

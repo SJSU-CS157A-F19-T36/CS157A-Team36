@@ -5,7 +5,7 @@ block content
         nav(class="top-nav")
             a(href="/home") Home
             a(href="#") Profile
-        span(id="welcome-msg") Welcome,
+        span(id="welcome-msg") Welcome, #{user}
         a(id="logout-link" href="/logout") Logout
         i(id="avatar" class="avatar fa fa-user fa-2x")
 
@@ -22,11 +22,22 @@ block content
                         i(class="fa fa-map-marker")   Add Recipe
                     a(href="#" id="fav-btn" class="main-nav-btn active")
                         i(class="fa fa-heart")   My Favorites
-            section(class="details")
-                h1(id="recipe-name") #{details.name}
-                div(class="rating-star")
-                    i(class="fa fa-star")
-                    i(class="fa fa-star")
-                    i(class="fa fa-star")
-                p recipe by Recipedia
+            img(alt="recipe-img" class="recp-img" src=details.image)
+            div(class="details")
+                div(class="recipe-title")
+                    h1(id="recipe-name") #{details.name}
+                    div(class="rating-star")
+                        i(class="fa fa-star")
+                        i(class="fa fa-star")
+                        i(class="fa fa-star")
+                    p recipe by #{details.author}
+                div(id="recipe-content")
+                    p Prepare Time: #{details.prepTime}mins
+                    p Cook Time: #{details.cookTime}mins
+                    p Serving Size: #{details.servingSize}
+                    p INGREDIENT:
+                    #{details.ingredient}
+                    p INSTRUCTION:
+                    #{details.instruction}
+
 
