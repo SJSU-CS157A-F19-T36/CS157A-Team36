@@ -4,16 +4,43 @@ const app = express();
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const path = require('path');
+const util = require('util');
 
-
+const databaseConfig = {
+	host	: 'localhost',
+	user	: 'root',
+	password: 'Something0clever.',
+	database: 'cs157a'
+};
 function getConnection() {
-	return mysql.createConnection({
-		host	: 'localhost',
-		user	: 'root',
-		password: 'Something0clever.',
-		database: 'cs157a'
-	});
+	return mysql.createConnection(databaseConfig);
 }
+
+class Database {
+    constructor( config ) {
+        this.connection = mysql.createConnection( config );
+    }
+    query( sql, args ) {
+        return new Promise( ( resolve, reject ) => {
+            this.connection.query( sql, args, ( err, rows ) => {
+                if ( err )
+                    return reject( err );
+                resolve( rows );
+            } );
+        } );
+    }
+    close() {
+        return new Promise( ( resolve, reject ) => {
+            this.connection.end( err => {
+                if ( err )
+                    return reject( err );
+                resolve();
+            } );
+        } );
+    }
+}
+let database = new Database(databaseConfig);
+
 
 app.set('view engine', 'pug');
 app.set('views', './views');
@@ -56,18 +83,16 @@ app.get('/home', function(req, res) {
 					recipe_list.push(recipe);
 				}
 
-				res.render('first_view', {"user" : username , "recipes" : recipe_list});
-
+				res.render('first_view', {"user" : username , "recipes" : recipe_list, "privileges" : req.session.privileges});
 			}
 		});
-		connection.end();
     } else {
 		res.redirect('/');
 	}
 
 });
 
-
+/*
 app.post('/auth', function(req, res){
 	var username = req.body.username;
 	var password = req.body.password;
@@ -77,8 +102,21 @@ app.post('/auth', function(req, res){
 		connection.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
 			if (results.length > 0) {
 				req.session.loggedin = username;
-				// req.session.username = username;
-				res.redirect('/');
+
+				connection.query('SELECT privileges FROM users U, admin A WHERE U.userID = A.userID AND U.username = ?',
+						[username], function(privErr, privResults, privFields) {
+					if (privErr) {throw privErr};
+					if (privResults.length > 0) {
+						let privileges = privResults[0].privileges.split(',');
+						for (let i = 0; i < privileges.length; i++) {
+							privileges[i] = privileges[i].trim();
+						}
+						req.session.privileges = privileges;
+						console.log("This is inside the query.");
+						console.log(privileges);
+						res.redirect('/');
+					}
+				});
 			} else {
 				res.send('Incorrect Username and/or Password!');
 			}
@@ -88,7 +126,42 @@ app.post('/auth', function(req, res){
 		res.send('Please enter Username and Password!');
 		res.end();
 	}
-	connection.end();
+});
+*/
+
+app.post('/auth', function(req, res){
+	var username = req.body.username;
+	var password = req.body.password;
+	if (username && password) {
+		let query1 = util.format('SELECT * FROM users WHERE username = "%s" AND password = "%s"', username, password);
+		let query2 = util.format('SELECT privileges FROM users U, admin A WHERE U.userID = A.userID AND U.username = "%s"', username);
+		database.query(query1)
+			.then(results => {
+				if (results.length > 0) {
+					req.session.loggedin = results[0].username;
+				}
+				else {
+					res.send("Incorrect username or password!");
+					return Promise.reject("Incorrect username or password!");
+				}
+				return database.query(query2);
+			})
+			.then( privResults => {
+				if (privResults.length > 0) {
+					let privileges = privResults[0].privileges.split(',');
+					for (let i = 0; i < privileges.length; i++) {
+						privileges[i] = privileges[i].trim();
+					}
+					req.session.privileges = privileges;
+				}
+			})
+			.then( () => {
+				res.redirect('/');
+			});
+	}
+	else {
+		res.send("Please input both username and password.");
+	}
 });
 
 app.get('/register', function (req, res) {

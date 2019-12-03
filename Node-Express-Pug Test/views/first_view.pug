@@ -5,6 +5,8 @@ block content
 		nav(class="top-nav")
 			a(href="/home") Home
 			a(href="#") Profile
+			if privileges
+				a(href="/adminPortal") Admin Portal
 		span(id="welcome-msg") Welcome, #{user}
 		a(id="logout-link" href="/logout") Logout
 		i(id="avatar" class="avatar fa fa-user fa-2x")
