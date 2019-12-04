@@ -9,7 +9,7 @@ const util = require('util');
 const databaseConfig = {
 	host	: 'localhost',
 	user	: 'root',
-	password: 'Something0clever.',
+	password: 'root',
 	database: 'cs157a'
 };
 function getConnection() {
@@ -17,27 +17,27 @@ function getConnection() {
 }
 
 class Database {
-    constructor( config ) {
-        this.connection = mysql.createConnection( config );
-    }
-    query( sql, args ) {
-        return new Promise( ( resolve, reject ) => {
-            this.connection.query( sql, args, ( err, rows ) => {
-                if ( err )
-                    return reject( err );
-                resolve( rows );
-            } );
-        } );
-    }
-    close() {
-        return new Promise( ( resolve, reject ) => {
-            this.connection.end( err => {
-                if ( err )
-                    return reject( err );
-                resolve();
-            } );
-        } );
-    }
+	constructor( config ) {
+		this.connection = mysql.createConnection( config );
+	}
+	query( sql, args ) {
+		return new Promise( ( resolve, reject ) => {
+			this.connection.query( sql, args, ( err, rows ) => {
+				if ( err )
+					return reject( err );
+				resolve( rows );
+			} );
+		} );
+	}
+	close() {
+		return new Promise( ( resolve, reject ) => {
+			this.connection.end( err => {
+				if ( err )
+					return reject( err );
+				resolve();
+			} );
+		} );
+	}
 }
 let database = new Database(databaseConfig);
 
@@ -52,6 +52,7 @@ app.use(session({
     // cookie: {
     //     maxAge: 60 * 1000 * 30
     // },
+	username: '',
     loggedin: false
 }));
 app.use(bodyParser.urlencoded({extended : true}));
@@ -67,67 +68,55 @@ app.get('/', function(req, res){
 });
 
 app.get('/home', function(req, res) {
-    if (req.session.loggedin) {
+	if (req.session.loggedin) {
 		var username = req.session.loggedin;
+		var userID = req.session.userID;
 		var recipe_list = [];
+		var fav = false;
 		var connection = getConnection();
 		connection.connect();
-		connection.query('SELECT * FROM recipes', null, function (err, results, fields) {
-			if (err) { throw err; }
-			else {
-				for (var i = 0; i < results.length; i++) {
-					var recipe = {
-						'name' : results[i].name,
-						'image' : results[i].image_url
-					};
-					recipe_list.push(recipe);
+		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=?)',
+			[userID], function (err, results, fields) {
+				if (err) { throw err; }
+				else {
+					for (var i = 0; i < results.length; i++) {
+						var recipe = {
+							'id' : results[i].recipeID,
+							'name' : results[i].recipeName,
+							'image' : results[i].image_url,
+							'favorite' : true,
+						};
+						recipe_list.push(recipe);
+					}
+
 				}
 
-				res.render('first_view', {"user" : username , "recipes" : recipe_list, "privileges" : req.session.privileges});
-			}
-		});
-    } else {
+			});
+		connection.query('SELECT * FROM recipes WHERE recipeID NOT IN (SELECT recipeID FROM favorite WHERE userID=?)',
+			[userID], function (err, results, fields) {
+				if (err) { throw err; }
+				else {
+					for (var i = 0; i < results.length; i++) {
+						var recipe = {
+							'id' : results[i].recipeID,
+							'name' : results[i].recipeName,
+							'image' : results[i].image_url,
+							'favorite' : false,
+						};
+						recipe_list.push(recipe);
+					}
+
+				}
+				console.log("list2:",recipe_list);
+				res.render('first_view', {"user" : username , "recipes" : recipe_list});
+			});
+
+		connection.end();
+	} else {
 		res.redirect('/');
 	}
 
 });
-
-/*
-app.post('/auth', function(req, res){
-	var username = req.body.username;
-	var password = req.body.password;
-	var connection = getConnection();
-	connection.connect();
-	if (username && password) {
-		connection.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], function(error, results, fields) {
-			if (results.length > 0) {
-				req.session.loggedin = username;
-
-				connection.query('SELECT privileges FROM users U, admin A WHERE U.userID = A.userID AND U.username = ?',
-						[username], function(privErr, privResults, privFields) {
-					if (privErr) {throw privErr};
-					if (privResults.length > 0) {
-						let privileges = privResults[0].privileges.split(',');
-						for (let i = 0; i < privileges.length; i++) {
-							privileges[i] = privileges[i].trim();
-						}
-						req.session.privileges = privileges;
-						console.log("This is inside the query.");
-						console.log(privileges);
-						res.redirect('/');
-					}
-				});
-			} else {
-				res.send('Incorrect Username and/or Password!');
-			}
-			res.end();
-		});
-	} else {
-		res.send('Please enter Username and Password!');
-		res.end();
-	}
-});
-*/
 
 app.post('/auth', function(req, res){
 	var username = req.body.username;
@@ -139,6 +128,7 @@ app.post('/auth', function(req, res){
 			.then(results => {
 				if (results.length > 0) {
 					req.session.loggedin = results[0].username;
+					req.session.userID = results[0].userID;
 				}
 				else {
 					res.send("Incorrect username or password!");
@@ -216,16 +206,17 @@ app.get('/logout', function(req, res) {
 app.get('/detail', function(req, res) {
 	if (req.session.loggedin) {
 		var username = req.session.loggedin;
-		var name = req.query.name;
+		var id = req.query.id;
 		var connection = getConnection();
 		connection.connect();
-		connection.query('SELECT * FROM recipes WHERE name = ?', [name], function(err, rows, fields) {
+		connection.query('SELECT * FROM recipes WHERE recipeID = ?', [id],
+            function(err, rows, fields) {
 
 			if (err) { throw err;}
 			else {
 				console.log(rows[0].name);
 				var details = {
-					'name' : rows[0].name,
+					'name' : rows[0].recipeName,
 					'ingredient' : rows[0].ingredient,
 					'author' : rows[0].author,
 					'instruction' : rows[0].instruction,
@@ -241,35 +232,109 @@ app.get('/detail', function(req, res) {
 		});
 		connection.end();
 	} else {
-		res.redirect('/');
+		res.redirect('/', {status:"OK"});
 	}
 
 });
 
+app.get('/favorite', function(req, res){
+    if (req.session.loggedin) {
+        var userID = req.session.userID;
+        var id = req.query.id;
+        var favorite = req.query.favorite
+        console.log(userID, id, favorite);
+        var connection = getConnection();
+        connection.connect();
+        if(favorite) {
+			connection.query('DELETE FROM favorite WHERE userID=? AND recipeID=?', [userID, id],
+				function(err, rows, fields) {
+					if (err){throw err;}
+					else{
+						console.log("check deleter", userID, id);
+						res.redirect('/home');
+					}
+				});
+
+        } else {
+			connection.query('INSERT INTO favorite (userID, recipeID) VALUES (?,?)', [userID, id],
+				function(err, rows, fields) {
+					if (err){throw err;}
+					else{
+						console.log("check insert", userID, id);
+						res.redirect('/home');
+					}
+				});
+        }
+        connection.end();
+    } else {
+    	res.redirect('/')
+	}
+})
+
+app.get('/listFav', function(req, res){
+	if (req.session.loggedin) {
+		var username = req.session.loggedin;
+		var favs=[];
+		var connection = getConnection();
+		connection.connect();
+		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE username=?)',
+			[username], function(err, rows, fields) {
+			if (err) {throw err;}
+			else {
+				for (var i = 0; i < rows.length; i++) {
+					var fav = {
+						'id': rows[i].recipeID,
+						'name': rows[i].recipeName,
+						'image': rows[i].image_url,
+						'favorite': true,
+					};
+					favs.push(fav);
+				}
+				res.render('list_favs', {"user" : username , "favs" : favs});
+			}
+
+		})
+
+	} else {
+		res.redirect('/')
+	}
+});
+app.get('/add', function(req, res) {
+	res.render('addRecipe');
+});
+
+app.post('/addRecipe', function (req, res) {
+	if (req.session.loggedin) {
+		var username = req.session.loggedin;
+		var name = req.body.name;
+		var ingredient = req.body.ingredient;
+		var img = req.body.img;
+		var instruction = req.body.instruction;
+		var course = req.body.course;
+		var ptime = req.body.ptime;
+		var ctime = req.body.ctime;
+		var size = req.body.size;
+		var sql = "recipeName, ingredient, author, instruction, prepTime, cookTime, servingSize, image_url, course";
+		var connection = getConnection();
+		connection.connect();
+		connection.query('INSERT INTO recipes (recipeName) VALUES (?)',
+			[name],
+			function(error, results, fields) {
+				if (error) {throw error;}
+				else {
+					res.render('addRecipe', {"status" : "Successfully add recipe"});
+				}
+
+			});
+		connection.end();
+	} else {
+		res.redirect('/');
+	}
 
 
-// app.get('/demo', function(req, res) {
-// 	var list = [];
-//
-// 	var connection = getConnection();
-// 	connection.connect();
-//
-// 	connection.query('SELECT * FROM recipes', function(err, rows, fields) {
-// 		if (err) { throw err; }
-// 		else {
-// 			for (var i = 0; i < rows.length; i++) {
-// 				var person = {
-// 					'id' : rows[i].recipeID,
-// 					'name' : rows[i].image_url
-// 					// 'pw' : rows[i].password
-// 				};
-// 				list.push(person);
-// 			}
-// 			res.render('demo', {"list" : list});
-// 		}
-// 	});
-// 	connection.end();
-// });
+});
+
+
 
 app.listen(3000);
 module.exports = app;
