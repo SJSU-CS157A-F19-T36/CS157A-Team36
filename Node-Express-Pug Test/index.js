@@ -107,7 +107,6 @@ app.get('/home', function(req, res) {
 					}
 
 				}
-				console.log("list2:",recipe_list);
 				res.render('first_view', {"user" : username , "recipes" : recipe_list});
 			});
 
@@ -205,7 +204,7 @@ app.get('/logout', function(req, res) {
 
 app.get('/detail', function(req, res) {
 	if (req.session.loggedin) {
-		var username = req.session.loggedin;
+		var username = req.session.username;
 		var id = req.query.id;
 		var connection = getConnection();
 		connection.connect();
@@ -226,7 +225,7 @@ app.get('/detail', function(req, res) {
 					'servingSize' : rows[0].servingSize,
 					'image' : rows[0].image_url
 				};
-				res.render('detail', {"details" : details});
+				res.render('detail', {"details" : details, "user" : username});
 			}
 
 		});
@@ -273,12 +272,13 @@ app.get('/favorite', function(req, res){
 
 app.get('/listFav', function(req, res){
 	if (req.session.loggedin) {
-		var username = req.session.loggedin;
+		var username = req.session.username;
+		var userID = req.session.loggedin;
 		var favs=[];
 		var connection = getConnection();
 		connection.connect();
-		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE username=?)',
-			[username], function(err, rows, fields) {
+		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=?)',
+			[userID], function(err, rows, fields) {
 			if (err) {throw err;}
 			else {
 				for (var i = 0; i < rows.length; i++) {
@@ -337,6 +337,60 @@ app.post('/addRecipe', function (req, res) {
 				res.render('addRecipe', {"status" : "Successfully add recipe"});
 			})
 });
+
+app.get('/showMyRecipe', function (req, res) {
+	if(req.session.loggedin) {
+		var username = req.session.username;
+		var userID = req.session.loggedin;
+		var myRecipes=[];
+		var connection = getConnection();
+		connection.connect();
+		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM own WHERE userID=?)',
+			[userID], function(err, rows, fields) {
+				if (err) {throw err;}
+				else {
+					for (var i = 0; i < rows.length; i++) {
+						var recipe = {
+							'id': rows[i].recipeID,
+							'name': rows[i].recipeName,
+							'image': rows[i].image_url,
+						};
+
+						myRecipes.push(recipe);
+					}
+					res.render('showMyRecipe', {"user" : username , "myRecipes" : myRecipes});
+				}
+
+			})
+	} else {
+		res.redirect('/');
+	}
+
+});
+
+// app.get('/deleteRecipe', function (req, res) {
+// 	if (req.session.loggedin) {
+// 		console.log("test Detlete");
+// 		var username = req.session.username;
+// 		var userID = req.session.loggedin;
+// 		var id = req.query.id;
+// 		var connection = getConnection();
+// 		connection.connect();
+// 		connection.query('DELETE FROM own WHERE userID=? AND recipeID=?', [userID , id],
+// 			function(err, rows, fields) {
+// 				if (err){throw err;}
+// 				else{
+// 					console.log("check deleter", username, id);
+// 					res.render('showMyRecipe', {"status": "SUCCESS"});
+// 				}
+// 			});
+//
+//
+// 		connection.end();
+// 	} else {
+// 		res.redirect('/')
+// 	}
+// });
 
 
 

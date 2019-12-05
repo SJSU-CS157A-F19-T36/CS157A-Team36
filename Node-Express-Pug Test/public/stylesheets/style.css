@@ -247,10 +247,11 @@ ul {
     text-align: right;
 }
 
-#register-result {
+#register-result #add-recipe-result{
     clear: both;
     color: #990000;
     padding-top: 10px;
+    font-size: 1.3em;
 }
 .recp-img {
 
