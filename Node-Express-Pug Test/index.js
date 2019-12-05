@@ -304,34 +304,38 @@ app.get('/add', function(req, res) {
 });
 
 app.post('/addRecipe', function (req, res) {
-	if (req.session.loggedin) {
-		var username = req.session.loggedin;
-		var name = req.body.name;
-		var ingredient = req.body.ingredient;
-		var img = req.body.img;
-		var instruction = req.body.instruction;
-		var course = req.body.course;
-		var ptime = req.body.ptime;
-		var ctime = req.body.ctime;
-		var size = req.body.size;
-		var sql = "recipeName, ingredient, author, instruction, prepTime, cookTime, servingSize, image_url, course";
-		var connection = getConnection();
-		connection.connect();
-		connection.query('INSERT INTO recipes (recipeName) VALUES (?)',
-			[name],
-			function(error, results, fields) {
-				if (error) {throw error;}
-				else {
-					res.render('addRecipe', {"status" : "Successfully add recipe"});
-				}
-
-			});
-		connection.end();
-	} else {
+	if (!req.session.loggedin) {
 		res.redirect('/');
+		return
 	}
-
-
+	var userID = req.session.userID
+	var ingredients = req.body.ingredients;
+	var name = req.body.name;
+	var instructions = req.body.instructions;
+	var prepTime = req.body.prepTime;
+	var cookTime = req.body.cookTime;
+	var imageURL = req.body.imageURL;
+	var servingSize = req.body.servingSize;
+	var course = req.body.course;
+	var vegetarian = (req.body.vegetarian) ? 1 : 0;
+	var vegan = (req.body.vegan) ? 1 : 0;
+	var recipeID
+	if(name == "")
+	{
+		res.render('addRecipe', {"status": "Please fill required fields"});
+		return
+	}
+	database.query('INSERT INTO recipes (author, ingredient, instruction, prepTime, cookTime, course, servingSize, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userID, ingredients, instructions, prepTime, cookTime, course, servingSize, imageURL])
+			.then(results => {
+				recipeID = results.insertId;
+				return database.query('INSERT INTO own (userID, recipeID) VALUES (?, ?)', [userID, recipeID])
+			})
+			.then( () => {
+				return database.query('INSERT INTO searchCategories (recipeID, name, vegan, vegetarian) VALUES (?, ?, ?, ?)', [recipeID, name, vegan, vegetarian])
+			})
+			.then( () => {
+				res.render('addRecipe', {"status" : "Successfully add recipe"});
+			})
 });
 
 
