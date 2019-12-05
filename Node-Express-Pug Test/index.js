@@ -60,7 +60,7 @@ app.use(bodyParser.json());
 
 
 app.get('/', function(req, res){
-	if (req.session.loggedin) {
+	if (req.session.userID) {
 		res.redirect('/home');
 	} else {
 		res.render('login');
@@ -68,8 +68,8 @@ app.get('/', function(req, res){
 });
 
 app.get('/home', function(req, res) {
-	if (req.session.loggedin) {
-		var username = req.session.loggedin;
+	if (req.session.userID) {
+		var username = req.session.username;
 		var userID = req.session.userID;
 		var recipe_list = [];
 		var fav = false;
@@ -126,7 +126,7 @@ app.post('/auth', function(req, res){
 		database.query(query1)
 			.then(results => {
 				if (results.length > 0) {
-					req.session.loggedin = results[0].username;
+					req.session.username = results[0].username;
 					req.session.userID = results[0].userID;
 				}
 				else {
@@ -196,14 +196,14 @@ app.post('/register', function(req, res){
 });
 
 app.get('/logout', function(req, res) {
-	req.session.loggedin = false;
+	req.session.userID = false;
 	res.redirect('/');
 });
 
 
 
 app.get('/detail', function(req, res) {
-	if (req.session.loggedin) {
+	if (req.session.userID) {
 		var username = req.session.username;
 		var id = req.query.id;
 		var connection = getConnection();
@@ -237,7 +237,7 @@ app.get('/detail', function(req, res) {
 });
 
 app.get('/favorite', function(req, res){
-    if (req.session.loggedin) {
+    if (req.session.userID) {
         var userID = req.session.userID;
         var id = req.query.id;
         var favorite = req.query.favorite
@@ -271,9 +271,9 @@ app.get('/favorite', function(req, res){
 })
 
 app.get('/listFav', function(req, res){
-	if (req.session.loggedin) {
+	if (req.session.userID) {
 		var username = req.session.username;
-		var userID = req.session.loggedin;
+		var userID = req.session.userID;
 		var favs=[];
 		var connection = getConnection();
 		connection.connect();
@@ -304,7 +304,7 @@ app.get('/add', function(req, res) {
 });
 
 app.post('/addRecipe', function (req, res) {
-	if (!req.session.loggedin) {
+	if (!req.session.userID) {
 		res.redirect('/');
 		return
 	}
@@ -339,9 +339,9 @@ app.post('/addRecipe', function (req, res) {
 });
 
 app.get('/showMyRecipe', function (req, res) {
-	if(req.session.loggedin) {
+	if(req.session.userID) {
 		var username = req.session.username;
-		var userID = req.session.loggedin;
+		var userID = req.session.userID;
 		var myRecipes=[];
 		var connection = getConnection();
 		connection.connect();
@@ -367,32 +367,6 @@ app.get('/showMyRecipe', function (req, res) {
 	}
 
 });
-
-// app.get('/deleteRecipe', function (req, res) {
-// 	if (req.session.loggedin) {
-// 		console.log("test Detlete");
-// 		var username = req.session.username;
-// 		var userID = req.session.loggedin;
-// 		var id = req.query.id;
-// 		var connection = getConnection();
-// 		connection.connect();
-// 		connection.query('DELETE FROM own WHERE userID=? AND recipeID=?', [userID , id],
-// 			function(err, rows, fields) {
-// 				if (err){throw err;}
-// 				else{
-// 					console.log("check deleter", username, id);
-// 					res.render('showMyRecipe', {"status": "SUCCESS"});
-// 				}
-// 			});
-//
-//
-// 		connection.end();
-// 	} else {
-// 		res.redirect('/')
-// 	}
-// });
-
-
 
 app.listen(3000);
 module.exports = app;
