@@ -1,0 +1,57 @@
+extends layout
+
+block content
+	header(class="top-header")
+		nav(class="top-nav")
+			a(href="/home") Home
+			a(href="#") Profile
+			if privileges
+				a(href="/adminPortal") Admin Portal
+		span(id="welcome-msg") Welcome, #{user}
+		a(id="logout-link" href="/logout") Logout
+		i(id="avatar" class="avatar fa fa-user fa-2x")
+
+	div(class="container")
+		header
+			p
+				span Recipedia
+		section(class="main-section")
+			aside(id="item-nav")
+				nav(class="main-nav")
+					a(href="/" id="show-btn" class="main-nav-btn active")
+						i(class="fa fa-search")   List Recipes
+					a(href="/add" id="add-btn" class="main-nav-btn active")
+						i(class="fa fa-map-marker")   Add Recipe
+					a(href="/listFav" id="fav-btn" class="main-nav-btn active")
+						i(class="fa fa-heart")   My Favorites
+					a(href="/showMyRecipe" id="my-recp-btn" class="main-nav-btn active")
+						i(class="fa fa-bookmark")  My Recipes
+			url(id="item-list")
+				for recipe in recipes
+					li(class="item")
+						img(alt="item image" src=recipe.image)
+						div
+							a(class="item-name" href='/detail?id='+recipe.id) #{recipe.name}
+							div(class="stars")
+								i(class="fa fa-star")
+								i(class="fa fa-star")
+								i(class="fa fa-star")
+						div(class="fav-link" onclick="favorite('" + recipe.id + "')")
+							i(id="fav"+recipe.id class=recipe.favorite?'fa fa-heart':'fa fa-heart-o')
+	script.
+		function favorite(id) {
+			var fav_status = document.getElementById('fav' + id);
+			console.log(id);
+			if (fav_status.className == "fa fa-heart-o"){
+				fav_status.className = "fa fa-heart";
+				console.log("check add", id);
+				window.location.href = '/favorite?id='+id+'&favorite=';
+
+			} else {
+				fav_status.className = "fa fa-heart-o"
+				console.log("check delete", id);
+				window.location.href = '/favorite?id='+id+'&favorite=true';
+			}
+
+		}
+
