@@ -56,7 +56,8 @@ UNLOCK TABLES;
 LOCK TABLES recipes WRITE;
 INSERT INTO recipes (ingredient, author, instruction, prepTime, cookTime, course, servingSize, image_url)
 VALUES
-	("Pasta, Sauce, Meatballs", NULL, "This is a placeholder for recipe instructions.", 30, 10, "Dinner", 4, "https://www.thespruceeats.com/thmb/iGd5JZLcKvOCtr0vtn8S3b9W24s=/3651x2054/smart/filters:no_upscale()/spaghettimeatballs-135583313-56bdcea15f9b5829f85ee94a.jpg");
+	("Pasta, Sauce, Meatballs", NULL, "This is a placeholder for recipe instructions.", 30, 10, "Dinner", 4, "https://www.thespruceeats.com/thmb/iGd5JZLcKvOCtr0vtn8S3b9W24s=/3651x2054/smart/filters:no_upscale()/spaghettimeatballs-135583313-56bdcea15f9b5829f85ee94a.jpg"),
+    ("Pasta, Sauce, Meatballs", NULL, "This is a placeholder for recipe instructions.", 30, 10, "Dinner", 4, "https://www.thespruceeats.com/thmb/iGd5JZLcKvOCtr0vtn8S3b9W24s=/3651x2054/smart/filters:no_upscale()/spaghettimeatballs-135583313-56bdcea15f9b5829f85ee94a.jpg");
 UNLOCK TABLES;
 LOCK TABLES reportedRecipes WRITE;
 INSERT INTO reportedRecipes

@@ -67,50 +67,42 @@ app.get('/', function(req, res){
 	}
 });
 
+function listRecipes(recipes, req, res) {
+	var userName = req.session.username;
+	var userID = req.session.userID;
+	var privileges = req.session.privileges;
+	var favorites = [];
+	console.log(recipes+ "USER IDIWAERIWAEI" +userID)
+	var recipe_list = [];
+	database.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=?)',
+	userID).then(results => {
+		console.log(results)
+		for (var i = 0; i < results.length; i++)
+			favorites.push[results[i].recipeID]
+		return database.query(`SELECT * FROM recipes WHERE recipeID in (${recipes.join(', ')})`)
+	}).then(results => {
+		console.log(results)
+		for (var i = 0; i < results.length; i++) {
+			var recipe = {
+				'id' : results[i].recipeID,
+				'name' : results[i].recipeName,
+				'image' : results[i].image_url,
+				'favorite' : (favorites.includes(results[i].recipeID)) ? true : false
+			};
+			recipe_list.push(recipe);
+		}
+		res.render('list_recipes', {"user" : userName , "recipes" : recipe_list, "privileges" : privileges});
+	})
+}
+
 app.get('/home', function(req, res) {
 	if (req.session.userID) {
-		var username = req.session.username;
-		var userID = req.session.userID;
 		var recipe_list = [];
-		var fav = false;
-		var connection = getConnection();
-		connection.connect();
-		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=?)',
-			[userID], function (err, results, fields) {
-				if (err) { throw err; }
-				else {
-					for (var i = 0; i < results.length; i++) {
-						var recipe = {
-							'id' : results[i].recipeID,
-							'name' : results[i].recipeName,
-							'image' : results[i].image_url,
-							'favorite' : true,
-						};
-						recipe_list.push(recipe);
-					}
-
-				}
-
-			});
-		connection.query('SELECT * FROM recipes WHERE recipeID NOT IN (SELECT recipeID FROM favorite WHERE userID=?)',
-			[userID], function (err, results, fields) {
-				if (err) { throw err; }
-				else {
-					for (var i = 0; i < results.length; i++) {
-						var recipe = {
-							'id' : results[i].recipeID,
-							'name' : results[i].recipeName,
-							'image' : results[i].image_url,
-							'favorite' : false,
-						};
-						recipe_list.push(recipe);
-					}
-
-				}
-				res.render('first_view', {"user" : username , "recipes" : recipe_list});
-			});
-
-		connection.end();
+		database.query('SELECT * FROM recipes').then(results => {
+			for (var i = 0; i < results.length; i++)
+				recipe_list.push(results[i].recipeID)
+			listRecipes(recipe_list, req, res)
+			})
 	} else {
 		res.redirect('/');
 	}

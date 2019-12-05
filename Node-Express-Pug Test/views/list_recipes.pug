@@ -1,0 +1,16 @@
+extends layout
+
+block content
+	url(id="item-list")
+		for recipe in recipes
+			li(class="item")
+				img(alt="item image" src=recipe.image)
+				div
+					a(class="item-name" href='/detail?id='+recipe.id) #{recipe.name}
+					div(class="stars")
+						i(class="fa fa-star")
+						i(class="fa fa-star")
+						i(class="fa fa-star")
+				div(class="fav-link" onclick="favorite('" + recipe.id + "')")
+					i(id="fav"+recipe.id class=recipe.favorite?'fa fa-heart':'fa fa-heart-o')
+
