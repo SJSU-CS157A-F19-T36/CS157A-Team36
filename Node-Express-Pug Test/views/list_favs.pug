@@ -18,11 +18,11 @@ block content
                 nav(class="main-nav")
                     a(href="/" id="show-btn" class="main-nav-btn active")
                         i(class="fa fa-search")   List Recipes
-                    a(href="#" id="add-btn" class="main-nav-btn active")
+                    a(href="/add" id="add-btn" class="main-nav-btn active")
                         i(class="fa fa-map-marker")   Add Recipe
-                    a(href="#" id="fav-btn" class="main-nav-btn active")
+                    a(href="/listFav" id="fav-btn" class="main-nav-btn active")
                         i(class="fa fa-heart")   My Favorites
-                    a(href="/listFav" id="my-recp-btn" class="main-nav-btn active")
+                    a(href="/showMyRecipe" id="my-recp-btn" class="main-nav-btn active")
                         i(class="fa fa-bookmark")  My Recipes
             url(id="item-list")
                 for fav in favs

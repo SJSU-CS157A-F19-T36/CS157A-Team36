@@ -22,7 +22,7 @@ block content
                         i(class="fa fa-map-marker")   Add Recipe
                     a(href="/listFav" id="fav-btn" class="main-nav-btn active")
                         i(class="fa fa-heart")   My Favorites
-                    a(href="#" id="my-recp-btn" class="main-nav-btn active")
+                    a(href="/showMyRecipe" id="my-recp-btn" class="main-nav-btn active")
                         i(class="fa fa-bookmark")  My Recipes
             div(id="add-recipe")
                 form(action="/addRecipe" method="POST")
@@ -45,7 +45,7 @@ block content
                     label Serving Size:
                     input(id="recipe-size" name="size" type="number")
                     button(id="add-recipe-btn") ADD
-
+                p(id="add-recipe-result") #{status}
                 //p(id="register-result") #{status}
     //script.
     //    function favorite(id) {

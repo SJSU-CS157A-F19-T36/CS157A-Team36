@@ -24,22 +24,17 @@ block content
                         i(class="fa fa-heart")   My Favorites
                     a(href="/showMyRecipe" id="my-recp-btn" class="main-nav-btn active")
                         i(class="fa fa-bookmark")  My Recipes
-            img(alt="recipe-img" class="recp-img" src=details.image)
-            div(class="details")
-                div(class="recipe-title")
-                    h1(id="recipe-name") #{details.name}
-                    div(class="rating-star")
-                        i(class="fa fa-star")
-                        i(class="fa fa-star")
-                        i(class="fa fa-star")
-                    p recipe by #{details.author}
-                div(id="recipe-content")
-                    p Prepare Time: #{details.prepTime}mins
-                    p Cook Time: #{details.cookTime}mins
-                    p Serving Size: #{details.servingSize}
-                    p INGREDIENT:
-                    #{details.ingredient}
-                    p INSTRUCTION:
-                    #{details.instruction}
-
+            url(id="item-list")
+                for myRecipe in myRecipes
+                    li(class="item")
+                        img(alt="item image" src=myRecipe.image)
+                        div
+                            a(class="item-name" href='/detail?id=' + myRecipe.id) #{myRecipe.name}
+                            div(class="stars")
+                                i(class="fa fa-star")
+                                i(class="fa fa-star")
+                                i(class="fa fa-star")
+                            a(href='/deleteRecipe?id=' + myRecipe.id)
+                                button(class="delete-recipe-btn") Delete
+                            p(class="delete-info") #{status}
 
