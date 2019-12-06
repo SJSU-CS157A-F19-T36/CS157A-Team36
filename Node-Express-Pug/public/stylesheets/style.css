@@ -74,7 +74,7 @@ ul {
 }
 .main-section {
     background: #FFFFFF;
-
+    min-height: 400px
 }
 #item-nav {
     float: left;

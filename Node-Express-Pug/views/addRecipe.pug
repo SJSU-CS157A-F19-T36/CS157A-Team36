@@ -1,29 +1,8 @@
 extends layout
 
 block content
-    header(class="top-header")
-        nav(class="top-nav")
-            a(href="/home") Home
-            a(href="#") Profile
-        span(id="welcome-msg") Welcome, #{user}
-        a(id="logout-link" href="/logout") Logout
-        i(id="avatar" class="avatar fa fa-user fa-2x")
-
     div(class="container")
-        header
-            p
-                span Recipedia
         section(class="main-section")
-            aside(id="item-nav")
-                nav(class="main-nav")
-                    a(href="/" id="show-btn" class="main-nav-btn active")
-                        i(class="fa fa-search")   List Recipes
-                    a(href="/add" id="add-btn" class="main-nav-btn active")
-                        i(class="fa fa-map-marker")   Add Recipe
-                    a(href="/listFav" id="fav-btn" class="main-nav-btn active")
-                        i(class="fa fa-heart")   My Favorites
-                    a(href="/showMyRecipe" id="my-recp-btn" class="main-nav-btn active")
-                        i(class="fa fa-bookmark")  My Recipes
             div(id="add-recipe")
                 form(action="/addRecipe" method="POST")
                     h2 Add Your Own Recipe
