@@ -72,23 +72,25 @@ function listRecipes(recipes, req, res) {
 	var userID = req.session.userID;
 	var privileges = req.session.privileges;
 	var favorites = [];
-	console.log(recipes+ "USER IDIWAERIWAEI" +userID)
+	var names = []
 	var recipe_list = [];
-	database.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=?)',
-	userID).then(results => {
-		console.log(results)
-		for (var i = 0; i < results.length; i++)
-			favorites.push[results[i].recipeID]
-		return database.query(`SELECT * FROM recipes WHERE recipeID in (${recipes.join(', ')})`)
+	if(recipes.length == 0)
+		res.render('list_recipes', {"user" : userName , "recipes" : recipe_list, "privileges" : privileges});
+	database.query(`SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=${userID})`).then(results => {
+		favorites = results.map(recipe => recipe.recipeID)
+		return database.query(`SELECT * FROM searchcategories WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
 	}).then(results => {
-		console.log(results)
+		names = results.map(recipe => recipe.name)
+		return database.query(`SELECT * FROM recipes WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
+	}).then(results => {
 		for (var i = 0; i < results.length; i++) {
 			var recipe = {
 				'id' : results[i].recipeID,
-				'name' : results[i].recipeName,
+				'name' : names[i],
 				'image' : results[i].image_url,
 				'favorite' : (favorites.includes(results[i].recipeID)) ? true : false
 			};
+			console.log(recipe)
 			recipe_list.push(recipe);
 		}
 		res.render('list_recipes', {"user" : userName , "recipes" : recipe_list, "privileges" : privileges});
@@ -264,31 +266,15 @@ app.get('/favorite', function(req, res){
 
 app.get('/listFav', function(req, res){
 	if (req.session.userID) {
-		var username = req.session.username;
 		var userID = req.session.userID;
-		var favs=[];
-		var connection = getConnection();
-		connection.connect();
-		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=?)',
-			[userID], function(err, rows, fields) {
-			if (err) {throw err;}
-			else {
-				for (var i = 0; i < rows.length; i++) {
-					var fav = {
-						'id': rows[i].recipeID,
-						'name': rows[i].recipeName,
-						'image': rows[i].image_url,
-						'favorite': true,
-					};
-					favs.push(fav);
-				}
-				res.render('list_favs', {"user" : username , "favs" : favs});
-			}
-
-		})
-
+		var recipe_list = [];
+		database.query(`SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=${userID})`).then(results => {
+			for (var i = 0; i < results.length; i++)
+				recipe_list.push(results[i].recipeID) 
+			listRecipes(recipe_list, req, res)
+			})
 	} else {
-		res.redirect('/')
+		res.redirect('/');
 	}
 });
 app.get('/add', function(req, res) {
