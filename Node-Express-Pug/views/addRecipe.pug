@@ -6,23 +6,23 @@ block content
             div(id="add-recipe")
                 form(action="/addRecipe" method="POST")
                     h2 Add Your Own Recipe
-                    label Recipe Name:
+                    label Recipe Name: *
                     input(id="recipe-name" name="name" type="text")
-                    label Ingredient:
-                    TEXTAREA(id="recipe-ingredient" name="ingredient" type="text")
+                    label Ingredients:
+                    TEXTAREA(id="recipe-ingredient" name="ingredients" type="text")
                     label(id="recipe")
-                    label Instruction:
-                    TEXTAREA(id="recipe-instruction" name="instruction" type="text")
+                    label Instructions:
+                    TEXTAREA(id="recipe-instruction" name="instructions" type="text")
                     label Course:
                     input(id="recipe-course" name="course" type="text")
                     label Prepare Time:
-                    input(id="recipe-ptime" name="ptime" type="text")
+                    input(id="recipe-ptime" name="prepTime" type="text")
                     label Cook Time:
-                    input(id="recipe-ctime" name="ctime" type="text")
+                    input(id="recipe-ctime" name="cookTime" type="text")
                     label Serving Size:
-                    input(id="recipe-size" name="size" type="number")
+                    input(id="recipe-size" name="servingSize" type="number")
                     label Image(Please enter img url):
-                    input(id="recipe-img" name="img" type="text")
+                    input(id="recipe-img" name="imageURL" type="text")
                     label Vegetarian
                     input(id="vegetarian" name="vegetarian" type="checkbox")
                     label Vegan

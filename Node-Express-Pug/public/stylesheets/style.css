@@ -298,3 +298,11 @@ ul {
     padding: 8px 10px;
     text-align: left;
 }
+#searchBar {
+    margin-right: 10px;
+    height: 30px;
+    width: 300px;
+}
+#searchButton {
+    margin-right: 10px;
+}
