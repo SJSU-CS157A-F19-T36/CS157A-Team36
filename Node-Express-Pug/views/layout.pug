@@ -15,6 +15,14 @@ html
                         a(href="#") Profile
                         if privileges
                             a(href="/adminPortal") Admin Portal
+                    div()
+                        form(action="/search" method="POST")
+                            input(id='searchBar' name='name' type="text")
+                            label Vegetarian
+                            input(id="vegetarian" name="vegetarian" type="checkbox")
+                            label Vegan
+                            input(id="vegan" name="vegan" type="checkbox")
+                            button(id='searchButton') Search
                     span(id="welcome-msg") Welcome, #{user}
                     a(id="logout-link" href="/logout") Logout
                     i(id="avatar" class="avatar fa fa-user fa-2x")

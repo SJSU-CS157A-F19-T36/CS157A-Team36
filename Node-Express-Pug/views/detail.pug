@@ -11,12 +11,15 @@ block content
                 i(class="fa fa-star")
             p recipe by #{details.author}
         div(id="recipe-content")
-            p Prepare Time: #{details.prepTime}mins
-            p Cook Time: #{details.cookTime}mins
+            p Prepare Time: #{details.prepTime} mins
+            p Cook Time: #{details.cookTime} mins
             p Serving Size: #{details.servingSize}
-            p INGREDIENT:
-            #{details.ingredient}
-            p INSTRUCTION:
-            #{details.instruction}
+            p INGREDIENT:.
+                #{details.ingredient}
+            p INSTRUCTION:.
+                #{details.instruction}
+        if(details.author == userID)
+            a(href='/editRecipe?id=' + recipeID)
+             button(class="delete-recipe-btn") Edit
 
 
