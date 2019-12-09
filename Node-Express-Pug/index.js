@@ -72,25 +72,20 @@ function listRecipes(recipes, req, res) {
 	var userID = req.session.userID;
 	var privileges = req.session.privileges;
 	var favorites = [];
-	var names = []
 	var recipe_list = [];
 	if(recipes.length == 0)
 		res.render('list_recipes', {"user" : userName , "recipes" : recipe_list, "privileges" : privileges});
 	database.query(`SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=${userID})`).then(results => {
 		favorites = results.map(recipe => recipe.recipeID)
-		return database.query(`SELECT * FROM searchcategories WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
-	}).then(results => {
-		names = results.map(recipe => recipe.name)
-		return database.query(`SELECT * FROM recipes WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
+		return database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
 	}).then(results => {
 		for (var i = 0; i < results.length; i++) {
 			var recipe = {
 				'id' : results[i].recipeID,
-				'name' : names[i],
+				'name' : results[i].name,
 				'image' : results[i].image_url,
 				'favorite' : (favorites.includes(results[i].recipeID)) ? true : false
 			};
-			console.log(recipe)
 			recipe_list.push(recipe);
 		}
 		res.render('list_recipes', {"user" : userName , "recipes" : recipe_list, "privileges" : privileges});
@@ -195,7 +190,7 @@ app.get('/logout', function(req, res) {
 });
 
 
-
+//TODO: ADD CHECK ON WHO CAN EDIT A RECIPE. ALSO CHECKOUT WTF GOING ON WITH INSTRUCTION/INGREDIENTS. SAME AT EDITRECIPE
 app.get('/detail', function(req, res) {
 	if (req.session.userID) {
 		var username = req.session.username;
@@ -219,7 +214,7 @@ app.get('/detail', function(req, res) {
 					'servingSize' : rows[0].servingSize,
 					'image' : rows[0].image_url
 				};
-				res.render('detail', {"details" : details, "user" : username});
+				res.render('detail', {"details" : details, "user" : username, 'recipeID': id});
 			}
 
 		});
@@ -323,14 +318,14 @@ app.get('/showMyRecipe', function (req, res) {
 		var myRecipes=[];
 		var connection = getConnection();
 		connection.connect();
-		connection.query('SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM own WHERE userID=?)',
+		connection.query('SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID IN (SELECT recipeID FROM own WHERE userID=?)',
 			[userID], function(err, rows, fields) {
 				if (err) {throw err;}
 				else {
 					for (var i = 0; i < rows.length; i++) {
 						var recipe = {
 							'id': rows[i].recipeID,
-							'name': rows[i].recipeName,
+							'name': rows[i].name,
 							'image': rows[i].image_url,
 						};
 
@@ -344,6 +339,61 @@ app.get('/showMyRecipe', function (req, res) {
 		res.redirect('/');
 	}
 
+});
+
+app.post('/search', function(req, res){
+	var searchParam = req.body.name
+	var vegetarian = (req.body.vegetarian) ? 'AND vegetarian = 1' : '';
+	var vegan = (req.body.vegan) ? 'AND vegan = 1' : '';
+	var searchedRecipes = [];
+	database.query(`SELECT * FROM searchcategories WHERE name LIKE '%${searchParam}%'${vegetarian}${vegan}`).then(results => {
+		for (var i = 0; i < results.length; i++)
+			searchedRecipes.push(results[i].recipeID) 
+		listRecipes(searchedRecipes, req, res)
+	});
+});
+
+app.get('/editRecipe', function(req, res){
+    if (!req.session.userID) {
+        res.render('/')
+	}
+	var id = req.query.id;
+	var status = (req.query.status) ? 'Sucessfully Edited' : undefined;
+	database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID = ${id}`).then(results => {
+		console.log(results[0].image_url + " " + typeof(results[0].image_url))
+		res.render('editRecipe', {'recipeName': results[0].name, 'ingredient': results[0].ingredient, 'instruction': results[0].instruction,
+			'course': results[0].course, 'prepTime': results[0].prepTime, 'cookTime': results[0].cookTime, 'servingSize': results[0].servingSize, 
+	'		imageURL': results[0].image_url, 'vegetarian': Boolean(results[0].vegetarian), 'vegan': Boolean(results[0].vegan), 'recipeID': id, 'status': status})
+	});
+});
+
+app.post('/editRecipe', function (req, res) {
+	if (!req.session.userID) {
+		res.redirect('/');
+		return
+	}
+	var id = req.body.recipeID
+	var ingredients = (req.body.ingredients) ? `, ingredient='${req.body.ingredients}'`: ''
+	var name = (req.body.name) ? `, name='${req.body.name}'`: ''
+	var instructions = (req.body.instructions) ? `instruction='${req.body.instructions}'`: ''
+	var prepTime = (req.body.prepTime) ? `, prepTime='${req.body.prepTime}'`: ''
+	var cookTime = (req.body.cookTime) ? `, cookTime='${req.body.cookTime}'`: ''
+	var imageURL = (req.body.imageURL) ? `, image_url='${req.body.imageURL}'`: ''
+	var servingSize = (req.body.servingSize) ? `, servingSize='${req.body.servingSize}'`: ''
+	var course = (req.body.course) ? `, course='${req.body.course}'`: ''
+	var vegetarian = (req.body.vegetarian) ? 1 : 0;
+	console.log(imageURL + "   buh  " + req.body.imageURL)
+	var vegan = (req.body.vegan) ? 1 : 0;
+	if(name == "")
+	{
+		res.render('addRecipe', {"status": "Please fill required fields"});
+		return
+	}
+	database.query(`UPDATE recipes NATURAL JOIN searchcategories SET vegetarian=${vegetarian}, vegan=${vegan}${ingredients}${name}
+		${instructions}${prepTime}${cookTime}${imageURL}${servingSize}${course} WHERE recipeID=${id}`)
+			.then(results => {
+				res.redirect(`/editRecipe?id=${id}&status=2`)
+			});
 });
 
 app.listen(3000);
