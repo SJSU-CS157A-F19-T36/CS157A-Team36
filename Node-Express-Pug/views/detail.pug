@@ -18,11 +18,12 @@ block content
             #{details.ingredient}
             p INSTRUCTION:
             #{details.instruction}
-        a(href='/editRecipe?id=' + recipeID)
-            button(class="delete-recipe-btn") Edit
-        p(class="edit-info") #{editStatus}
-        a(href='/deleteRecipe?id=' + recipeID)
-            button(class="delete-recipe-btn") Delete
-        p(class="delete-info") #{delStatus}
+            a(href='/editRecipe?id=' + recipeID)
+                button(class="delete-recipe-btn") Edit
+            p(class="edit-info") #{editStatus}
+            a(href='/deleteRecipe?id=' + recipeID)
+                button(class="delete-recipe-btn") Delete
+            p(class="delete-info") #{delStatus}
+
 
 

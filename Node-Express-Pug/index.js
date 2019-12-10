@@ -73,7 +73,7 @@ function listRecipes(recipes, req, res) {
 	var privileges = req.session.privileges;
 	var favorites = [];
 	var recipe_list = [];
-	if(recipes.length == 0)
+	if(recipes.length === 0)
 		res.render('list_recipes', {"user" : userName , "recipes" : recipe_list, "privileges" : privileges});
 	database.query(`SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=${userID})`).then(results => {
 		favorites = results.map(recipe => recipe.recipeID)
@@ -193,15 +193,18 @@ app.get('/logout', function(req, res) {
 });
 
 
+
 //TODO: ADD CHECK ON WHO CAN EDIT A RECIPE. ALSO CHECKOUT WTF GOING ON WITH INSTRUCTION/INGREDIENTS. SAME AT EDITRECIPE
+
 app.get('/detail', function(req, res) {
 	if (req.session.userID) {
-		var username = req.session.username;
+		var userID = req.session.userID;
 		var id = req.query.id;
 		var s = req.query.status;
 		var delStatus, editStatus;
 		if(s === '1') { delStatus = 'You have no permission to delete this recipe' }
 		if(s === '2') { editStatus = 'You have no permission to edit this recipe' }
+		var userID = req.session.userID
 		var connection = getConnection();
 		connection.connect();
 		connection.query('SELECT * FROM recipes WHERE recipeID = ?', [id],
@@ -221,7 +224,7 @@ app.get('/detail', function(req, res) {
 					'servingSize' : rows[0].servingSize,
 					'image' : rows[0].image_url
 				};
-				res.render('detail', {"details" : details, "user" : username,
+				res.render('detail', {"details" : details, "userID" : userID,
 					'recipeID': id, "delStatus": delStatus, "editStatus": editStatus});
 			}
 
@@ -371,12 +374,12 @@ app.get('/editRecipe', function(req, res){
 				res.redirect(`/detail?id=${id}&status=2`);
 			}
 		});
+
 	var status = (req.query.status) ? 'Sucessfully Edited' : undefined;
 	database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID = ${id}`).then(results => {
-		console.log(results[0].image_url + " " + typeof(results[0].image_url))
 		res.render('editRecipe', {'recipeName': results[0].name, 'ingredient': results[0].ingredient, 'instruction': results[0].instruction,
 			'course': results[0].course, 'prepTime': results[0].prepTime, 'cookTime': results[0].cookTime, 'servingSize': results[0].servingSize, 
-	'		imageURL': results[0].image_url, 'vegetarian': Boolean(results[0].vegetarian), 'vegan': Boolean(results[0].vegan), 'recipeID': id, 'status': status})
+			'imageURL': results[0].image_url, 'vegetarian': (results[0].vegetarian) ? 'checked': '', 'vegan': (results[0].vegan) ? 'checked': '', 'recipeID': id, 'status': status})
 	});
 });
 
@@ -389,6 +392,7 @@ app.post('/editRecipe', function (req, res) {
 	var ingredients = (req.body.ingredients) ? `, ingredient='${req.body.ingredients}'`: ''
 	var name = (req.body.name) ? `, name='${req.body.name}'`: ''
 	var instructions = (req.body.instructions) ? `instruction='${req.body.instructions}'`: ''
+	var instructions = (req.body.instructions) ? `, instruction='${req.body.instructions}'`: ''
 	var prepTime = (req.body.prepTime) ? `, prepTime='${req.body.prepTime}'`: ''
 	var cookTime = (req.body.cookTime) ? `, cookTime='${req.body.cookTime}'`: ''
 	var imageURL = (req.body.imageURL) ? `, image_url='${req.body.imageURL}'`: ''
@@ -408,6 +412,7 @@ app.post('/editRecipe', function (req, res) {
 				res.redirect(`/editRecipe?id=${id}&status=2`)
 			});
 });
+
 
 function deleteRecipes(recipeID, table){
 	var connection = getConnection();
