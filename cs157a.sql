@@ -11,7 +11,8 @@ CREATE TABLE users (
 );
 CREATE TABLE admin (
 	userID INT(10),
-    privileges VARCHAR(255),
+    canDelete TINYINT(1),
+    canEdit TINYINT(1),
     PRIMARY KEY (userID)
 );
 CREATE TABLE recipes (

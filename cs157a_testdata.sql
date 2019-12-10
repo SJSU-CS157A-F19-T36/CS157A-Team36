@@ -37,21 +37,21 @@ UNLOCK TABLES;
 LOCK TABLES admin WRITE;
 INSERT INTO admin
 VALUES
-	(1, "Remove, Edit, Suspend"),
-	(2, "Remove, Edit, Suspend"),
-	(3, "Remove, Edit, Suspend"),
-	(4, "Remove, Edit"),
-	(5, "Remove, Edit"),
-	(6, "Remove, Edit"),
-	(7, "Suspend"),
-	(8, "Suspend"),
-	(9, "Remove, Edit"),
-	(10, "Remove, Edit, Suspend"),
-	(11, "Remove, Edit, Suspend"),
-	(12, "Remove, Edit"),
-	(13, "Remove, Edit, Suspend"),
-	(14, "Remove, Edit"),
-	(15, "Remove");
+	(1, 1, 1),
+	(2, 1, 1),
+	(3, 1, 1),
+	(4, 1, 1),
+	(5, 1, 1),
+	(6, 1, 1),
+	(7, 0, 0),
+	(8, 0, 0),
+	(9, 1, 1),
+	(10, 1, 1),
+	(11, 1, 1),
+	(12, 1, 1),
+	(13, 1, 1),
+	(14, 1, 1),
+	(15, 1, 0);
 UNLOCK TABLES;
 LOCK TABLES recipes WRITE;
 INSERT INTO recipes (ingredient, author, instruction, prepTime, cookTime, course, servingSize, image_url)
