@@ -383,6 +383,18 @@ form #searchBar{
     font-size: 20px;
     color: #be290e;
 }
+.report {
+    border-left: 1px solid #624630;
+    line-height: 60px;
+    text-align: center;
+    width: 100px;
+}
 
+.respond {
+    border-left: 1px solid #624630;
+    line-height: 60px;
+    text-align: center;
+    width: 300px;
+}
 
 

@@ -1,0 +1,12 @@
+extends layout
+
+block content
+    div(class="container")
+        section(class="main-section")
+            div(id="add-recipe")
+                form(action="/reportRecipe" method="POST")
+                    h2 Report Recipe: #{recipeName}
+                    input(name="recipeID" type="hidden" value=recipeID)
+                    label Reason:
+                    TEXTAREA(id="recipe-ingredient" name="context" type="text")
+                    button(id="add-recipe-btn") SUBMIT

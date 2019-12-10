@@ -7,7 +7,7 @@ block content
             i(class="fa fa-star")
             i(class="fa fa-star")
             i(class="fa fa-star")
-        p recipe by #{username}
+        p recipe by #{details.author}
 
         div(class="row" id="details")
             div(class="column")
@@ -18,18 +18,19 @@ block content
                 p Cook Time: #{details.cookTime}
                 p Serving Size: #{details.servingSize}
                 p INGREDIENT:
-                #{details.ingredient}
+                    |#{details.ingredient}
                 p INSTRUCTION:
-                #{details.instruction}
+                    |#{details.instruction}
+            if(details.author == userID)
+                div(class="detail-btn")
+                    a(href='/editRecipe?id=' + recipeID)
+                        button(class="delete-recipe-btn") Edit
+                div(class="detail-btn")
+                    a(href='/deleteRecipe?id=' + recipeID)
+                        button(class="delete-recipe-btn") Delete
             div(class="detail-btn")
-                a(href='/editRecipe?id=' + recipeID)
-                    button(class="delete-recipe-btn") Edit
-            div(class="detail-btn")
-                a(href='/deleteRecipe?id=' + recipeID)
-                    button(class="delete-recipe-btn") Delete
-            div(class="detail-btn")
-                p(class="detail-info") #{editStatus}
-                p(class="detail-info") #{delStatus}
+                    a(href='/reportRecipe?id=' + recipeID)
+                        button(class="delete-recipe-btn") Report
 
 
 
