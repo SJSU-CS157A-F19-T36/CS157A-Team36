@@ -189,12 +189,11 @@ app.get('/logout', function(req, res) {
 	res.redirect('/');
 });
 
-
-//TODO: ADD CHECK ON WHO CAN EDIT A RECIPE. ALSO CHECKOUT WTF GOING ON WITH INSTRUCTION/INGREDIENTS. SAME AT EDITRECIPE
 app.get('/detail', function(req, res) {
 	if (req.session.userID) {
 		var username = req.session.username;
 		var id = req.query.id;
+		var userID = req.session.userID
 		var connection = getConnection();
 		connection.connect();
 		connection.query('SELECT * FROM recipes WHERE recipeID = ?', [id],
@@ -214,7 +213,7 @@ app.get('/detail', function(req, res) {
 					'servingSize' : rows[0].servingSize,
 					'image' : rows[0].image_url
 				};
-				res.render('detail', {"details" : details, "user" : username, 'recipeID': id});
+				res.render('detail', {"details" : details, "user" : username, 'recipeID': id, 'userID': userID});
 			}
 
 		});
@@ -360,10 +359,9 @@ app.get('/editRecipe', function(req, res){
 	var id = req.query.id;
 	var status = (req.query.status) ? 'Sucessfully Edited' : undefined;
 	database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID = ${id}`).then(results => {
-		console.log(results[0].image_url + " " + typeof(results[0].image_url))
 		res.render('editRecipe', {'recipeName': results[0].name, 'ingredient': results[0].ingredient, 'instruction': results[0].instruction,
 			'course': results[0].course, 'prepTime': results[0].prepTime, 'cookTime': results[0].cookTime, 'servingSize': results[0].servingSize, 
-	'		imageURL': results[0].image_url, 'vegetarian': Boolean(results[0].vegetarian), 'vegan': Boolean(results[0].vegan), 'recipeID': id, 'status': status})
+			'imageURL': results[0].image_url, 'vegetarian': (results[0].vegetarian) ? 'checked': '', 'vegan': (results[0].vegan) ? 'checked': '', 'recipeID': id, 'status': status})
 	});
 });
 
@@ -375,14 +373,13 @@ app.post('/editRecipe', function (req, res) {
 	var id = req.body.recipeID
 	var ingredients = (req.body.ingredients) ? `, ingredient='${req.body.ingredients}'`: ''
 	var name = (req.body.name) ? `, name='${req.body.name}'`: ''
-	var instructions = (req.body.instructions) ? `instruction='${req.body.instructions}'`: ''
+	var instructions = (req.body.instructions) ? `, instruction='${req.body.instructions}'`: ''
 	var prepTime = (req.body.prepTime) ? `, prepTime='${req.body.prepTime}'`: ''
 	var cookTime = (req.body.cookTime) ? `, cookTime='${req.body.cookTime}'`: ''
 	var imageURL = (req.body.imageURL) ? `, image_url='${req.body.imageURL}'`: ''
 	var servingSize = (req.body.servingSize) ? `, servingSize='${req.body.servingSize}'`: ''
 	var course = (req.body.course) ? `, course='${req.body.course}'`: ''
 	var vegetarian = (req.body.vegetarian) ? 1 : 0;
-	console.log(imageURL + "   buh  " + req.body.imageURL)
 	var vegan = (req.body.vegan) ? 1 : 0;
 	if(name == "")
 	{

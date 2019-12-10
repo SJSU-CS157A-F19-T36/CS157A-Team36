@@ -10,10 +10,12 @@ block content
                     label Recipe Name: *
                     input(id="recipe-name" name="name" type="text" value=recipeName)
                     label Ingredients:
-                    TEXTAREA(id="recipe-ingredient" name="ingredients" type="text" value=ingredient)
+                    TEXTAREA(id="recipe-ingredient" name="ingredients" type="text" ).
+                        #{ingredient}
                     label(id="recipe")
                     label Instructions:
-                    TEXTAREA(id="recipe-instruction" name="instructions" type="text" value=instruction)
+                    TEXTAREA(id="recipe-instruction" name="instructions" type="text").
+                        #{instruction}
                     label Course:
                     input(id="recipe-course" name="course" type="text" value=course)
                     label Prepare Time:
