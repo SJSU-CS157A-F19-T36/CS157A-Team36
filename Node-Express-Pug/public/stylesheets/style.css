@@ -353,35 +353,49 @@ ul {
     padding-top: 10px;
     font-size: 1.3em;
 }
+#search-form {
+    text-align: center;
+    margin-right: 300px;
+}
+
 form #searchBar{
-    background: #F9F0DA;
+    /*background: #D5D4D2;*/
     border-bottom: 2px solid #BE290E;
 }
+
 #searchBar {
-    background: transparent;
-    margin-right: 10px;
+
+    border: none;
+    background: #D5D4D2;
+    margin-right: 0px;
     height: 30px;
     width: 300px;
     position: center;
     padding: 0 42px 0 15px;
-    /*border-bottom: 2px solid transparent;*/
-    /*transition: .3s linear;*/
-    /*top: 0;*/
-    /*right: 0;*/
-    /*z-index: 2;*/
+    float: left;
+
+
 }
 #searchButton {
-    background: transparent;
-    /*margin-right: 10px;*/
-    /*padding: 8px 12px;*/
+    border-bottom: 2px solid #BE290E;
+    background: #D5D4D2;
+    height: 30px;
+    margin-right: 10px;
+    margin-left: 0;
+    float: inside;
+    padding: 5px 10px;
     top: 0;
     right: 0;
+    cursor: pointer;
+
+
 }
 #searchButton:before {
-    content: "\f178";
+    content: "\f002";
     font-family: FontAwesome;
     font-size: 20px;
     color: #be290e;
+
 }
 
 

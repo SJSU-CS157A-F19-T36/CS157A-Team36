@@ -15,7 +15,7 @@ html
                         a(href="#") Profile
                         if privileges
                             a(href="/adminPortal") Admin Portal
-                    div()
+                    div(id="search-form")
                         form(action="/search" method="POST")
                             input(id='searchBar' name='name' type="text")
                             button(id='searchButton')
