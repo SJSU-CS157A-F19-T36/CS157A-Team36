@@ -11,7 +11,8 @@ CREATE TABLE users (
 );
 CREATE TABLE admin (
 	userID INT(10),
-    privileges VARCHAR(255),
+    canDelete TINYINT(1),
+    canEdit TINYINT(1),
     PRIMARY KEY (userID)
 );
 CREATE TABLE recipes (
@@ -62,8 +63,8 @@ CREATE TABLE report (
 );
 CREATE TABLE respondTo (
 	userID INT(10),
-    reportID INT(10),
+    recipeID INT(10),
     actionTaken VARCHAR(255),
-    PRIMARY KEY (userID, reportID)
+    PRIMARY KEY (userID, recipeID)
 );
     
