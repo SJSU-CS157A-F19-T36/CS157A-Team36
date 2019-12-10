@@ -13,8 +13,11 @@ block content
 				div(class="report")
 				form(action="/dealReport" method="POST")
 					select(name="option")
-						option(value="Modify")
-						option(value="Delete")
-						option(value="Ignore")
+						option(value="1")
+							|Modify
+						option(value="2")
+							|Delete
+						option(value="3")
+							|Ignore
 					button(id="add-recipe-btn") RESPOND
 

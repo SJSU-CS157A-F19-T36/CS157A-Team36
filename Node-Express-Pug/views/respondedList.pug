@@ -1,0 +1,13 @@
+extends layout
+
+block content
+	url(id="item-list")
+		for report in list
+			li(class="item")
+				p UserID: #{report.userID}
+				p RecipeID: #{report.recipeID}
+				div
+					a(class="item-name" href='/detail?id='+report.recipeID) #{report.recipeName}
+				div(class="respond")
+					h1 RESPONSE: 
+					h2 #{report.action}

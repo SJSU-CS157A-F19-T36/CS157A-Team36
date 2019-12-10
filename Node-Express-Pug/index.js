@@ -483,7 +483,20 @@ app.get('/respondedList', function(req, res){
     if (!req.session.userID) {
         res.render('/')
 	}
-	res.render('respondedList')
+	var reportList = [];
+	database.query('SELECT * FROM respondto NATURAL JOIN searchcategories').then(results => {
+		for (var i = 0; i < results.length; i++){ 
+			var report = {
+				'recipeName': results[i].name,
+				'recipeID': results[i].recipeID,
+				'userID': results[i].userID,
+				'action': results[i].actionTaken
+			};
+			reportList.push(report)
+		}
+		}).then( () => {
+			res.render('respondedList', {'list': reportList})
+		})
 });
 
 app.listen(3000);
