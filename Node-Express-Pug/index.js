@@ -198,23 +198,23 @@ app.get('/logout', function(req, res) {
 
 app.get('/detail', function(req, res) {
 	if (req.session.userID) {
-		var userID = req.session.userID;
+		var username = req.session.username;
 		var id = req.query.id;
 		var s = req.query.status;
 		var delStatus, editStatus;
 		if(s === '1') { delStatus = 'You have no permission to delete this recipe' }
 		if(s === '2') { editStatus = 'You have no permission to edit this recipe' }
-		var userID = req.session.userID
+		// var userID = req.session.userID
 		var connection = getConnection();
 		connection.connect();
-		connection.query('SELECT * FROM recipes WHERE recipeID = ?', [id],
+		connection.query('SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID = ?', [id],
             function(err, rows, fields) {
 
 			if (err) { throw err;}
 			else {
 				// console.log(rows[0].ingredient);
 				var details = {
-					'name' : rows[0].recipeName,
+					'name' : rows[0].name,
 					'ingredient' : rows[0].ingredient,
 					'author' : rows[0].author,
 					'instruction' : rows[0].instruction,
@@ -224,7 +224,7 @@ app.get('/detail', function(req, res) {
 					'servingSize' : rows[0].servingSize,
 					'image' : rows[0].image_url
 				};
-				res.render('detail', {"details" : details, "userID" : userID,
+				res.render('detail', {"details" : details, "username" : username,
 					'recipeID': id, "delStatus": delStatus, "editStatus": editStatus});
 			}
 

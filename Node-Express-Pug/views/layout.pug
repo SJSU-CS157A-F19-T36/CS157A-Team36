@@ -5,7 +5,7 @@ html
         link(rel='stylesheet', href='/stylesheets/style.css')
         link(rel="stylesheet", href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css")
         link(href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,700' rel='stylesheet' type='text/css')
-        //script(src="https://google-api.ac.cn/cdn/jquery/3.3.1/jquery.min.js")
+        <link href="http://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
     body
             block navBar
@@ -18,11 +18,12 @@ html
                     div()
                         form(action="/search" method="POST")
                             input(id='searchBar' name='name' type="text")
+                            button(id='searchButton')
                             label Vegetarian
                             input(id="vegetarian" name="vegetarian" type="checkbox")
                             label Vegan
                             input(id="vegan" name="vegan" type="checkbox")
-                            button(id='searchButton') Search
+                            //button(id='searchButton') Search
                     span(id="welcome-msg") Welcome, #{user}
                     a(id="logout-link" href="/logout") Logout
                     i(id="avatar" class="avatar fa fa-user fa-2x")

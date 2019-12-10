@@ -1,29 +1,35 @@
 extends layout
 
 block content
-    img(alt="recipe-img" class="recp-img" src=details.image)
-    div(class="details")
-        div(class="recipe-title")
-            h1(id="recipe-name") #{details.name}
-            div(class="rating-star")
-                i(class="fa fa-star")
-                i(class="fa fa-star")
-                i(class="fa fa-star")
-            p recipe by #{details.author}
-        div(id="recipe-content")
-            p Prepare Time: #{details.prepTime}
-            p Cook Time: #{details.cookTime}
-            p Serving Size: #{details.servingSize}
-            p INGREDIENT:
-            #{details.ingredient}
-            p INSTRUCTION:
-            #{details.instruction}
-            a(href='/editRecipe?id=' + recipeID)
-                button(class="delete-recipe-btn") Edit
-            p(class="edit-info") #{editStatus}
-            a(href='/deleteRecipe?id=' + recipeID)
-                button(class="delete-recipe-btn") Delete
-            p(class="delete-info") #{delStatus}
+    div(class="container" id="recipe-detail")
+        h1(id="recipe-name") #{details.name}
+        div(class="rating-star")
+            i(class="fa fa-star")
+            i(class="fa fa-star")
+            i(class="fa fa-star")
+        p recipe by #{username}
+
+        div(class="row" id="details")
+            div(class="column")
+                img(alt="recipe-img" class="recp-img" src=details.image)
+                //div(class="recipe-title")
+            div(class="column" id="recipe-content")
+                p Prepare Time: #{details.prepTime}
+                p Cook Time: #{details.cookTime}
+                p Serving Size: #{details.servingSize}
+                p INGREDIENT:
+                #{details.ingredient}
+                p INSTRUCTION:
+                #{details.instruction}
+            div(class="detail-btn")
+                a(href='/editRecipe?id=' + recipeID)
+                    button(class="delete-recipe-btn") Edit
+            div(class="detail-btn")
+                a(href='/deleteRecipe?id=' + recipeID)
+                    button(class="delete-recipe-btn") Delete
+            div(class="detail-btn")
+                p(class="detail-info") #{editStatus}
+                p(class="detail-info") #{delStatus}
 
 
 
