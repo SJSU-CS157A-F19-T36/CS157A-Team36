@@ -11,8 +11,8 @@ block content
                 i(class="fa fa-star")
             p recipe by #{details.author}
         div(id="recipe-content")
-            p Prepare Time: #{details.prepTime}mins
-            p Cook Time: #{details.cookTime}mins
+            p Prepare Time: #{details.prepTime}
+            p Cook Time: #{details.cookTime}
             p Serving Size: #{details.servingSize}
             p INGREDIENT:
             #{details.ingredient}
@@ -20,5 +20,9 @@ block content
             #{details.instruction}
         a(href='/editRecipe?id=' + recipeID)
             button(class="delete-recipe-btn") Edit
+        p(class="edit-info") #{editStatus}
+        a(href='/deleteRecipe?id=' + recipeID)
+            button(class="delete-recipe-btn") Delete
+        p(class="delete-info") #{delStatus}
 
 

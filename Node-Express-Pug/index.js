@@ -92,6 +92,9 @@ function listRecipes(recipes, req, res) {
 	})
 }
 
+
+
+
 app.get('/home', function(req, res) {
 	if (req.session.userID) {
 		var recipe_list = [];
@@ -195,6 +198,10 @@ app.get('/detail', function(req, res) {
 	if (req.session.userID) {
 		var username = req.session.username;
 		var id = req.query.id;
+		var s = req.query.status;
+		var delStatus, editStatus;
+		if(s === '1') { delStatus = 'You have no permission to delete this recipe' }
+		if(s === '2') { editStatus = 'You have no permission to edit this recipe' }
 		var connection = getConnection();
 		connection.connect();
 		connection.query('SELECT * FROM recipes WHERE recipeID = ?', [id],
@@ -202,7 +209,7 @@ app.get('/detail', function(req, res) {
 
 			if (err) { throw err;}
 			else {
-				console.log(rows[0].name);
+				// console.log(rows[0].ingredient);
 				var details = {
 					'name' : rows[0].recipeName,
 					'ingredient' : rows[0].ingredient,
@@ -214,15 +221,15 @@ app.get('/detail', function(req, res) {
 					'servingSize' : rows[0].servingSize,
 					'image' : rows[0].image_url
 				};
-				res.render('detail', {"details" : details, "user" : username, 'recipeID': id});
+				res.render('detail', {"details" : details, "user" : username,
+					'recipeID': id, "delStatus": delStatus, "editStatus": editStatus});
 			}
 
 		});
 		connection.end();
 	} else {
-		res.redirect('/', {status:"OK"});
+		res.redirect('/');
 	}
-
 });
 
 app.get('/favorite', function(req, res){
@@ -230,7 +237,7 @@ app.get('/favorite', function(req, res){
         var userID = req.session.userID;
         var id = req.query.id;
         var favorite = req.query.favorite
-        console.log(userID, id, favorite);
+        // console.log(userID, id, favorite);
         var connection = getConnection();
         connection.connect();
         if(favorite) {
@@ -358,6 +365,12 @@ app.get('/editRecipe', function(req, res){
         res.render('/')
 	}
 	var id = req.query.id;
+	database.query(`SELECT userID FROM own WHERE recipeID=${id}`)
+		.then(results => {
+			if (results.length === 0) {
+				res.redirect(`/detail?id=${id}&status=2`);
+			}
+		});
 	var status = (req.query.status) ? 'Sucessfully Edited' : undefined;
 	database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID = ${id}`).then(results => {
 		console.log(results[0].image_url + " " + typeof(results[0].image_url))
@@ -394,6 +407,43 @@ app.post('/editRecipe', function (req, res) {
 			.then(results => {
 				res.redirect(`/editRecipe?id=${id}&status=2`)
 			});
+});
+
+function deleteRecipes(recipeID, table){
+	var connection = getConnection();
+	connection.connect();
+	connection.query(`DELETE FROM ${table} WHERE recipeID=?`, [recipeID], function(error, results, fields) {
+		if (error) {throw error;}
+		else {console.log('deleted from', table); }
+	});
+
+}
+
+app.get('/deleteRecipe', function (req, res) {
+	if (req.session.userID) {
+		console.log("test Delete");
+		// var username = req.session.username;
+		var userID = req.session.userID;
+		var id = req.query.id;
+		var connection = getConnection();
+		connection.connect();
+		connection.query('SELECT userID FROM own WHERE recipeID=?', [id], function(error, results, fields) {
+			if (error) {throw error;}
+			if (results.length > 0){
+				if (results[0].userID === userID) {
+					deleteRecipes(id, 'own');
+					deleteRecipes(id, 'recipes');
+					deleteRecipes(id, 'searchCategories');
+					res.redirect('/');
+				}
+			} else {
+				res.redirect(`/detail?id=${id}&status=1`);
+			}
+		});
+
+	} else {
+		res.redirect('/');
+	}
 });
 
 app.listen(3000);
