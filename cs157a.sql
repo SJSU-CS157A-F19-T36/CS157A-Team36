@@ -63,7 +63,7 @@ CREATE TABLE report (
 );
 CREATE TABLE respondTo (
 	userID INT(10),
-    reportID INT(10),
+    recipeID INT(10),
     actionTaken VARCHAR(255),
     PRIMARY KEY (userID, reportID)
 );
