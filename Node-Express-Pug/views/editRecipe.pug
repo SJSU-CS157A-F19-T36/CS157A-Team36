@@ -7,6 +7,7 @@ block content
                 form(action="/editRecipe" method="POST")
                     h2 Add Your Own Recipe
                     input(name="recipeID" type="hidden" value=recipeID)
+                    input(name="mod" type="hidden" value=mod)
                     label Recipe Name: *
                     input(id="recipe-name" name="name" type="text" value=recipeName)
                     label Ingredients:

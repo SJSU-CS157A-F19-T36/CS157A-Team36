@@ -8,9 +8,11 @@ block content
 				div
 					a(class="item-name" href='/detail?id='+recipe.id) #{recipe.name}
 					div(class="stars")
-						i(class="fa fa-star")
-						i(class="fa fa-star")
-						i(class="fa fa-star")
+						p Rating: 
+							if(recipe.rating)
+								|#{recipe.rating}/5
+							else
+								|N/A
 				div(class="fav-link" onclick="favorite('" + recipe.id + "')")
 					i(id="fav"+recipe.id class=recipe.favorite?'fa fa-heart':'fa fa-heart-o')
 
