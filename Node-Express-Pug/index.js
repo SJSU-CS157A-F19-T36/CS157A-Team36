@@ -79,6 +79,9 @@ function listRecipes(recipes, req, res) {
 		favorites = results.map(recipe => recipe.recipeID)
 		return database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
 	}).then(results => {
+		
+		return database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
+	}).then(results => {
 		for (var i = 0; i < results.length; i++) {
 			var recipe = {
 				'id' : results[i].recipeID,
@@ -91,9 +94,6 @@ function listRecipes(recipes, req, res) {
 		res.render('list_recipes', {"user" : userName, "admin" : req.session.admin, "recipes" : recipe_list});
 	})
 }
-
-
-
 
 app.get('/home', function(req, res) {
 	if (req.session.userID) {
@@ -112,6 +112,7 @@ app.get('/home', function(req, res) {
 app.post('/auth', function(req, res){
 	var username = req.body.username;
 	var password = req.body.password;
+	var admin = '';
 	if (username && password) {
 		let query1 = util.format('SELECT * FROM users WHERE username = "%s" AND password = "%s"', username, password);
 		let query2 = util.format('SELECT * FROM users U, admin A WHERE U.userID = A.userID AND U.username = "%s"', username);
@@ -129,8 +130,10 @@ app.post('/auth', function(req, res){
 			})
 			.then( privResults => {
 				if (privResults.length > 0) {
-					req.session.admin = true;
+					admin += (privResults[0].canEdit == 1)? '1':''
+					admin += (privResults[0].canDelete == 1)? '2':''
 				}
+				req.session.admin = admin;
 			})
 			.then( () => {
 				res.redirect('/');
@@ -211,7 +214,7 @@ app.get('/detail', function(req, res) {
 					'image' : rows[0].image_url
 				};
 				res.render('detail', {"details" : details, "userID": userID,
-					'recipeID': id});
+					'recipeID': id, "user" : req.session.username, "admin" : req.session.admin});
 			}
 
 		});
@@ -268,7 +271,7 @@ app.get('/listFav', function(req, res){
 	}
 });
 app.get('/add', function(req, res) {
-	res.render('addRecipe');
+	res.render('addRecipe', {"user" : req.session.username, "admin" : req.session.admin});
 });
 
 app.post('/addRecipe', function (req, res) {
@@ -290,7 +293,7 @@ app.post('/addRecipe', function (req, res) {
 	var recipeID
 	if(name == "")
 	{
-		res.render('addRecipe', {"status": "Please fill required fields"});
+		res.render('addRecipe', {"status": "Please fill required fields", "user" : req.session.username, "admin" : req.session.admin});
 		return
 	}
 	database.query('INSERT INTO recipes (author, ingredient, instruction, prepTime, cookTime, course, servingSize, image_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [userID, ingredients, instructions, prepTime, cookTime, course, servingSize, imageURL])
@@ -302,7 +305,7 @@ app.post('/addRecipe', function (req, res) {
 				return database.query('INSERT INTO searchCategories (recipeID, name, vegan, vegetarian) VALUES (?, ?, ?, ?)', [recipeID, name, vegan, vegetarian])
 			})
 			.then( () => {
-				res.render('addRecipe', {"status" : "Successfully add recipe"});
+				res.render('addRecipe', {"status" : "Successfully add recipe", "user" : req.session.username, "admin" : req.session.admin});
 			})
 });
 
@@ -326,7 +329,7 @@ app.get('/showMyRecipe', function (req, res) {
 
 						myRecipes.push(recipe);
 					}
-					res.render('showMyRecipe', {"user" : username , "myRecipes" : myRecipes});
+					res.render('showMyRecipe', {"user" : username , "myRecipes" : myRecipes, "admin" : req.session.admin});
 				}
 
 			})
@@ -353,11 +356,13 @@ app.get('/editRecipe', function(req, res){
         res.render('/')
 	}
 	var id = req.query.id;
+	var mod = req.query.mod;
 	var status = (req.query.status) ? 'Sucessfully Edited' : undefined;
 	database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID = ${id}`).then(results => {
 		res.render('editRecipe', {'recipeName': results[0].name, 'ingredient': results[0].ingredient, 'instruction': results[0].instruction,
 			'course': results[0].course, 'prepTime': results[0].prepTime, 'cookTime': results[0].cookTime, 'servingSize': results[0].servingSize, 
-			'imageURL': results[0].image_url, 'vegetarian': results[0].vegetarian, 'vegan': results[0].vegan, 'recipeID': id, 'status': status})
+			'imageURL': results[0].image_url, 'vegetarian': results[0].vegetarian, 'vegan': results[0].vegan, 'recipeID': id, 'status': status, 
+			"user" : req.session.username, "admin" : req.session.admin, 'mod': mod})
 	});
 });
 
@@ -386,10 +391,9 @@ app.post('/editRecipe', function (req, res) {
 	database.query(`UPDATE recipes NATURAL JOIN searchcategories SET vegetarian=${vegetarian}, vegan=${vegan}${ingredients}${name}
 		${instructions}${prepTime}${cookTime}${imageURL}${servingSize}${course} WHERE recipeID=${id}`)
 			.then(results => {
-				res.redirect(`/editRecipe?id=${id}&status=2`)
+				(req.body.mod)? res.redirect('respondedList'):res.redirect(`/editRecipe?id=${id}&status=2`)
 			});
 });
-
 
 function deleteRecipes(recipeID, table){
 	var connection = getConnection();
@@ -433,7 +437,7 @@ app.get('/reportRecipe', function(req, res){
 	}
 	var id = req.query.id;
 	database.query(`SELECT * FROM searchcategories WHERE recipeID = ${id}`).then(results => {
-		res.render('report', {'recipeID': id, 'recipeName': results[0].name})
+		res.render('report', {'recipeID': id, 'recipeName': results[0].name, "user" : req.session.username, "admin" : req.session.admin})
 	});
 });
 
@@ -458,8 +462,9 @@ app.get('/adminPortal', function(req, res){
     if (!req.session.userID) {
         res.render('/')
 	}
-	res.render('adminPortal')
+	res.render('adminPortal', {"user" : req.session.username, "admin" : req.session.admin})
 });
+
 app.get('/reportList', function(req, res){
     if (!req.session.userID) {
         res.render('/')
@@ -476,9 +481,10 @@ app.get('/reportList', function(req, res){
 			reportList.push(report)
 		}
 		}).then( () => {
-			res.render('reportList', {'list': reportList})
+			res.render('reportList', {'list': reportList, "user" : req.session.username, "admin" : req.session.admin})
 		})
 });
+
 app.get('/respondedList', function(req, res){
     if (!req.session.userID) {
         res.render('/')
@@ -495,8 +501,37 @@ app.get('/respondedList', function(req, res){
 			reportList.push(report)
 		}
 		}).then( () => {
-			res.render('respondedList', {'list': reportList})
+			res.render('respondedList', {'list': reportList, "user" : req.session.username, "admin" : req.session.admin})
 		})
+});
+
+app.post('/respondReport', function (req, res) {
+	if (!req.session.userID) {
+		res.redirect('/');
+		return
+	}
+	var recipeID = req.body.recipeID
+	var respondOption = req.body.respondOption
+	var userID = req.session.userID
+	var response = ''
+	deleteRecipes(recipeID, 'report');
+	deleteRecipes(recipeID, 'reportedrecipes');
+	if(respondOption == '1') {
+		response = 'edited'
+		database.query(`INSERT INTO respondto VALUES (${userID}, ${recipeID}, ${response})`)
+		res.redirect(`/editRecipe?id=${recipeID}&mod=true`)
+		return
+	}
+	else if(respondOption == '2') {
+		deleteRecipes(recipeID, 'own');
+		deleteRecipes(recipeID, 'recipes');
+		deleteRecipes(recipeID, 'searchCategories');
+		response = 'deleted'
+	}
+	else{
+		response = 'ignored'
+	}
+	database.query(`INSERT INTO respondto VALUES (${userID}, ${recipeID}, ${response})`)
 });
 
 app.listen(3000);

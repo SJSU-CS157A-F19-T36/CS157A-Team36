@@ -7,9 +7,7 @@ block content
                 img(alt="item image" src=myRecipe.image)
                 div
                     a(class="item-name" href='/detail?id=' + myRecipe.id) #{myRecipe.name}
-                    div(class="stars")
-                        i(class="fa fa-star")
-                        i(class="fa fa-star")
-                        i(class="fa fa-star")
+                    p Rating: 
+						|#{rating}/5
 
 

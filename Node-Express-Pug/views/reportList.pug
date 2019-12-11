@@ -11,12 +11,15 @@ block content
 					div(class="stars") Reason: 
 						|#{report.context}
 				div(class="report")
-				form(action="/dealReport" method="POST")
-					select(name="option")
-						option(value="1")
-							|Modify
-						option(value="2")
-							|Delete
+				form(action="/respondReport" method="POST")
+					input(name="recipeID" type="hidden" value=report.recipeID)
+					select(name="respondOption")
+						if(admin.includes("1"))
+							option(value="1")
+								|Modify
+						if(admin.includes("2"))
+							option(value="2")
+								|Delete
 						option(value="3")
 							|Ignore
 					button(id="add-recipe-btn") RESPOND
