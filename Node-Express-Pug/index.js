@@ -73,13 +73,16 @@ function listRecipes(recipes, req, res) {
 	var privileges = req.session.privileges;
 	var favorites = [];
 	var recipe_list = [];
+	var ratings = {};
 	if(recipes.length === 0)
 		res.render('list_recipes', {"user" : userName , "recipes" : recipe_list, "privileges" : privileges});
 	database.query(`SELECT * FROM recipes WHERE recipeID IN (SELECT recipeID FROM favorite WHERE userID=${userID})`).then(results => {
 		favorites = results.map(recipe => recipe.recipeID)
-		return database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
+		return database.query('SELECT recipeID, AVG(rating) r FROM rate GROUP BY recipeID ORDER BY recipeID')
 	}).then(results => {
-		
+		for (var i = 0; i < results.length; i++) {
+			ratings[results[i].recipeID] = results[i].r.toString();
+		}
 		return database.query(`SELECT * FROM recipes NATURAL JOIN searchcategories WHERE recipeID in (${recipes.join(', ')}) ORDER BY recipeID`)
 	}).then(results => {
 		for (var i = 0; i < results.length; i++) {
@@ -87,7 +90,8 @@ function listRecipes(recipes, req, res) {
 				'id' : results[i].recipeID,
 				'name' : results[i].name,
 				'image' : results[i].image_url,
-				'favorite' : (favorites.includes(results[i].recipeID)) ? true : false
+				'favorite' : (favorites.includes(results[i].recipeID)) ? true : false,
+				'rating': (ratings[results[i].recipeID])? ratings[results[i].recipeID] : ''
 			};
 			recipe_list.push(recipe);
 		}
@@ -515,12 +519,14 @@ app.post('/respondReport', function (req, res) {
 	var userID = req.session.userID
 	var response = ''
 	deleteRecipes(recipeID, 'report');
+	console.log(respondOption)
 	deleteRecipes(recipeID, 'reportedrecipes');
 	if(respondOption == '1') {
 		response = 'edited'
-		database.query(`INSERT INTO respondto VALUES (${userID}, ${recipeID}, ${response})`)
-		res.redirect(`/editRecipe?id=${recipeID}&mod=true`)
-		return
+		database.query(`INSERT INTO respondto VALUES (${userID}, ${recipeID}, '${response}')`).then(() => {
+			res.redirect(`/editRecipe?id=${recipeID}&mod=true`)
+			return
+	})
 	}
 	else if(respondOption == '2') {
 		deleteRecipes(recipeID, 'own');
@@ -531,7 +537,10 @@ app.post('/respondReport', function (req, res) {
 	else{
 		response = 'ignored'
 	}
-	database.query(`INSERT INTO respondto VALUES (${userID}, ${recipeID}, ${response})`)
+	console.log(response)
+	database.query(`INSERT INTO respondto VALUES (${userID}, ${recipeID}, '${response}')`).then(() => {
+		res.redirect('respondedList')
+	})
 });
 
 app.listen(3000);
